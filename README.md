@@ -52,13 +52,15 @@ value: hex number. This defines the MSR/PCI register number.
 value: bitmask in C syntax. This is used to make only parts of the register available.
 //#restricted_settings
 value: available settings separated by comas, or "readonly"
-//TODO: verfeinern, im kernel modul überprüfen, bei amd 
+//#reserved_settings
+value: reserved settings separated by comas
 //#processor_groups
 value: one or more processor groups delimited by ','
 ```
 
 The variable name (```//#name```) is optional and overrides the name defined by
-the text file. This variable can be used when 
+the text file. This variable can be used when the same knob has different register
+locations on different processors.
 
 The processor groups are defined as txt files in the directory processors.
 They use the same syntax. The following variables are used to describe a
