@@ -1,0 +1,12 @@
+//#description
+C-state Control
+//#device
+NB_F4
+//#register_index
+0x118
+//#bit_mask
+(0xFFFFFFFFULL)
+//#restricted_settings
+readonly
+//#processor_groups
+fam15h

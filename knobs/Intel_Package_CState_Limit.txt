@@ -1,0 +1,12 @@
+//#description
+Specifies the lowest processor-specific C-state code name (consuming the least power). for the package. The default is set as factory-configured package C-state limit. The following C-state code name encodings are supported: 000b: C0/C1 (no package C-sate support); 001b: C2; 010b: C6 no retention; 011b: C6 retention; 100b: C7; 101b: C7s; 111: No package C-state limit.; Note: This field cannot be used to limit package C-state to C3.
+//#device
+MSR
+//#register_index
+0x000000e2
+//#bit_mask
+0x7
+//#reserved_setting:
+6
+//#processor_groups
+sandybridge, ivybridge, haswell

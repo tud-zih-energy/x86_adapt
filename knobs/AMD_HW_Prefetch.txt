@@ -1,0 +1,10 @@
+//#description
+Disables HW Prefetcher for AMD processors
+//#device
+MSR
+//#register_index
+0xC0011022
+//#bit_mask
+(1ULL<<13)
+//#processor_groups
+fam15h,fam10h,fam11h

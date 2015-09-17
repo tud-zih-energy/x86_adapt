@@ -1,0 +1,10 @@
+//#description
+Value since last reset that this core is in processor-specific C6 states. Count at the same frequency as the TSC.
+//#device
+MSR
+//#register_index
+0x000003fd
+//#restricted_settings
+readonly
+//#processor_groups
+core2, nehalem, westmere, sandybridge, ivybridge, haswell

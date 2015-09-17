@@ -1,0 +1,10 @@
+//#description
+speculative prefetch disable. Read-write. Reset: 0. 1=Disable the L3 speculative miss prefetcher.
+//#device
+NB_F2
+//#register_index
+0x1B0
+//#bit_mask
+(1ULL << 13)
+//#processor_groups
+fam15h

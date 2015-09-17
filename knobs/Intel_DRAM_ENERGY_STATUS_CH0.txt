@@ -1,0 +1,12 @@
+//#description
+DRAM energy consumed by all the DIMMS in Channel0. The counter will wrap around and continue counting when it reaches its limit. The data is updated by PCODE and is Read Only for all SW.
+//#device
+SB_PCU2
+//#register_index
+0xa8
+//#bit_mask
+(0xFFFFFFFF)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge_ep,ivybridge_ep

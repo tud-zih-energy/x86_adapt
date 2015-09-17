@@ -1,0 +1,10 @@
+//#description
+When set, enables undemotion from demoted C1.
+//#device
+MSR
+//#register_index
+0x000000e2
+//#bit_mask
+(1ULL<<28)
+//#processor_groups
+sandybridge, ivybridge, haswell

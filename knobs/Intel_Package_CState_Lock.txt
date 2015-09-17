@@ -1,0 +1,10 @@
+//#description
+When set, lock Package C-State Limit, I/O MWAIT Redirection Enable, CFG Lock (R/WO) until next reset.
+//#device
+MSR
+//#register_index
+0x000000e2
+//#bit_mask
+0x8000
+//#processor_groups
+sandybridge, ivybridge, haswell

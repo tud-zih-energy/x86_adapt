@@ -1,0 +1,10 @@
+//#description
+clock divisor. Read-write. Specifies the core clock frequency while in the low-power state. This divisor is relative to the current FID frequency, or: • 100 MHz * (10h + MSRC001_00[68:64][CpuFid]) of the current P-state specified by MSRC001_0063[CurPstate]. If MSRC001_00[68:64][CpuDid] of the current P-state indicates a divisor that is deeper than specified by this field, then no frequency change is made when entering the low-power state associated with this register. This field is encoded as follows: Bits Divisor Bits Divisor 000b Divide-by 1. 100b Divide-by 16. 001b Divide-by 2. 101b Divide-by 128. 010b Divide-by 4. 110b Divide-by 512. 011b Divide-by 8. 111b Turn off clocks.
+//#device
+NB_F3
+//#register_index
+0x84
+//#bit_mask
+(0x7ULL << 29)
+//#processor_groups
+fam10h

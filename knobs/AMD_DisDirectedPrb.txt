@@ -1,0 +1,10 @@
+//#description
+disable directed probes. Read-write. Reset: 0. 1=Force broadcast probes on directory hits.
+//#device
+NB_F3
+//#register_index
+0x1D4
+//#bit_mask
+(1ULL << 16)
+//#processor_groups
+fam15h

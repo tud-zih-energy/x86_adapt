@@ -1,0 +1,10 @@
+//#description
+cache flush on halt timer. Revision B: Reserved. Revision C and later: Read-write. Cold reset: 00h. When cache flushing during halt is enabled (see F3xDC[CacheFlushOn-HaltCtl]) this field specifies how long each core needs to stay in halt before it flushes its caches. Bits Time 0h <= 5.12us 01h - 7Fh (CacheFlushOnHaltTmr * 10.24us) - 5.12us <= Time <= CacheFlushOnHaltTmr * 10.24us .If F3x[84:80][CpuPrbEn]=0 for the C1 state, only the time when the core is halted and has its clocks ramped up to service probes is counted. If F3x[84:80][CpuPrbEn]=1 for the C1 state, all of the time the core is halted is counted. BIOS should program this as follows: • Revision DA-C and C3 single-link processors where CPUID Fn8000_0006_EDX[L3Size]=0: 4h. • Revision E if CPB is enabled: Ch. • All other revisions: 28h.
+//#device
+NB_F3
+//#register_index
+0xDC
+//#bit_mask
+(0x7FULL << 19)
+//#processor_groups
+fam10h

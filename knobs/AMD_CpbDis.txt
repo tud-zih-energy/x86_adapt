@@ -1,0 +1,10 @@
+//#description
+core performance boost disable. Read-write. Reset: 0. Specifies whether core performance boost is requested to be enabled or disabled. 0=CPB is requested to be enabled. 1=CPB is disabled. See 2.5.3.1.1 [Application Power Management (APM)]. If core performance boost is disabled while a core is in a boosted P-state, the core will automatically transition to the highest performance nonboosted P-state.
+//#device
+MSR
+//#register_index
+0xC0010015
+//#bit_mask
+(1ULL<<25)
+//#processor_groups
+fam15h

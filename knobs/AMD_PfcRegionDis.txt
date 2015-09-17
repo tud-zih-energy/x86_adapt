@@ -1,0 +1,10 @@
+//#description
+Disables CU Region Prefetcher for AMD processors
+//#device
+MSR
+//#register_index
+0xC001102B
+//#bit_mask
+(1ULL<<16)
+//#processor_groups
+fam15h

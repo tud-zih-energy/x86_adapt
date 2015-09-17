@@ -1,0 +1,12 @@
+//#description
+DRAM scrub rate. BIOS: 2.10.5.6. Specifies time between 64 B scrub events. See D18F3x5C and D18F3x60. Specifies time between 64 B scrub events. Settings: 00h Disable sequential scrubbing; 01h 40 ns1; 02h 80 ns1; 03h 160 ns1; 04h 320 ns1; 05h 640 ns; 06h 1.28 us; 07h 2.56 us; 08h 5.12 us; 09h 10.2 us; 0Ah 20.5 us; 0Bh 41.0 us; 0Ch 81.9 us; 0Dh 163.8 us; 0Eh 327.7 us; 0Fh 655.4 us; 10h 1.31 ms; 11h 2.62 ms; 12h 5.24 ms; 13h 10.49 ms; 14h 20.97 ms; 15h 42 ms; 16h 84 ms; 1Eh-17h Reserved; 1Fh Reserved - 1. This setting is not supported except as a DRAM scrub rate when no other memory accesses are being performed.
+//#device
+NB_F3
+//#register_index
+0x58
+//#bit_mask
+(0x1FULL << 0)
+//#reserved_settings
+0x1F,0x1E,0x1D,0x1C,0x1B,0x1A,0x19,0x18,0x17
+//#processor_groups
+fam15h

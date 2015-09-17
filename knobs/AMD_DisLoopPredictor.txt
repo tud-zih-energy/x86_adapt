@@ -1,0 +1,10 @@
+//#description
+Disables loop predictor on piledriver
+//#device
+MSR
+//#register_index
+0xC0011021
+//#bit_mask
+(1ULL<<39)
+//#processor_groups
+piledriver

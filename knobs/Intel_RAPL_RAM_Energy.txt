@@ -1,0 +1,12 @@
+//#description
+MSR 0x619 which contains RAPL energy information for DRAM
+//#device
+MSR
+//#register_index
+0x619
+//#bit_mask
+0xFFFFFFFFFFFFFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge,ivybridge, haswell

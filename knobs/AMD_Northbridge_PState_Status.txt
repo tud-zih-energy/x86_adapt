@@ -1,0 +1,12 @@
+//#description
+Northbridge P-state Status
+//#device
+NB_F5
+//#register_index
+0x174
+//#bit_mask
+(0xFFFFFFULL)
+//#restricted_settings
+readonly
+//#processor_groups
+fam15h

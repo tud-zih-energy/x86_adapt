@@ -1,0 +1,12 @@
+//#description
+MSR 0x19A, bit 0: Extended On-Demand Clock Modulation Duty Cycle. if CPUID.06H:EAX[Bit 5] = 1, this extended value can be used to modify On-Demand Clock Modulation Value with 6.25% granularity (4 bit value), otherwise this is reserved. Setting:0: Reserved, 1-15 -> x*6.25% (6.25-93.75%)
+//#device
+MSR
+//#register_index
+0x19A
+//#bit_mask
+0xF
+//#restricted_settings
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+//#processor_groups
+sandybridge, ivybridge, haswell

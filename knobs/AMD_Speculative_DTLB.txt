@@ -1,0 +1,10 @@
+//#description
+Disables speculative DTLB reloads on AMD processors
+//#device
+MSR
+//#register_index
+0xC0011022
+//#bit_mask
+(1ULL<<4)
+//#processor_groups
+fam15h,fam11h,fam10h

@@ -1,0 +1,10 @@
+//#description
+Set Power Policy Bias 0 - performance; 6 balanced; 15 - energy saving
+//#device
+MSR
+//#register_index
+0x1B0
+//#bit_mask
+0xFLL
+//#processor_groups
+intel_epb

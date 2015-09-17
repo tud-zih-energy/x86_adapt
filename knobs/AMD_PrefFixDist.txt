@@ -1,0 +1,10 @@
+//#description
+prefetch fixed stride distance. Read-write. Reset: 00b. Specifies the distance to prefetch ahead if in fixed stride mode. 00b=1 cacheline; 01b=2 cachelines; 10b=3 cachelines; 11b=4 cachelines.
+//#device
+NB_F2
+//#register_index
+0x11C
+//#bit_mask
+(0x3ULL << 16)
+//#processor_groups
+fam10h,fam15h

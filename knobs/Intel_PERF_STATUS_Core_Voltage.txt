@@ -1,0 +1,12 @@
+//#description
+P-State Status Core Voltage. P-state core voltage can be computed by <this value> * (float) 1/(2^13).
+//#device
+MSR
+//#register_index
+0x00000198
+//#bit_mask
+(0xFFFFULL<<32)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge, ivybridge, haswell

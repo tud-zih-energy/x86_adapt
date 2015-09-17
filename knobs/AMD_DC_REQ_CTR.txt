@@ -1,0 +1,10 @@
+//#description
+Reset: 11b. Initial number of requests (1 to 3) a hardware prefetch can make. Setting this field to 0 disables the hardware prefetcher. BIOS should program this to 01b for multi-link processors. A setting of 01b may also be preferred for single-link processors running server workloads
+//#device
+MSR
+//#register_index
+0xC0011022
+//#bit_mask
+(3ULL<<34)
+//#processor_groups
+fam10h

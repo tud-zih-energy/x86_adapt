@@ -1,0 +1,12 @@
+//#description
+Current performance State Value
+//#device
+MSR
+//#register_index
+0x00000198
+//#bit_mask
+0xFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+nehalem, westmere, sandybridge, ivybridge, haswell

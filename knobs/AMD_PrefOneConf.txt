@@ -1,0 +1,10 @@
+//#description
+prefetch one-ahead confidence; Reset: 10b. BIOS: 10b. Confidence level required in order to prefetch one ahead (0 through 3).
+//#device
+NB_F2
+//#register_index
+0x11C
+//#bit_mask
+(3ULL << 20)
+//#processor_groups
+fam15h,fam10h

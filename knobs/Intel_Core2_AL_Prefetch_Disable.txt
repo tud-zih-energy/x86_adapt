@@ -1,0 +1,10 @@
+//#description
+When set to 1, the processor fetches the cache line that contains data currently required by the processor; When set to 0, the processor fetches cache lines that comprise a cache line pair
+//#device
+MSR
+//#register_index
+0x000001a0
+//#bit_mask
+(1ULL << 19)
+//#processor_groups
+core2

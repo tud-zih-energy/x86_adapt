@@ -1,0 +1,12 @@
+//#description
+This register contains a measurement proportional to the weighted DRAM BW for the channel including all ranks. The weights are configured in the memory controller channel register PM_CMD_PWR.
+//#device
+SB_PCU0
+//#register_index
+0x64
+//#bit_mask
+(0xFFFFFFFF)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge_ep,ivybridge_ep

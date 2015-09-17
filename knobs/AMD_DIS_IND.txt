@@ -1,0 +1,10 @@
+//#description
+1=Disable indirect branch predictor.
+//#device
+MSR
+//#register_index
+0xC0011021
+//#bit_mask
+(1ULL<<14)
+//#processor_groups
+fam10h

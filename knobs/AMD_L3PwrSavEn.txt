@@ -1,0 +1,10 @@
+//#description
+L3 power savings enable. Reset: 0. BIOS: 1. 1=The clock to idle subcaches in the L3 is stopped
+//#device
+NB_F4
+//#register_index
+0x1C4
+//#bit_mask
+(1ULL << 8)
+//#processor_groups
+fam15h,fam10h

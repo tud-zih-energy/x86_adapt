@@ -1,0 +1,14 @@
+//#name
+Intel_DRAM_ENERGY_STATUS_CH2
+//#description
+DRAM energy consumed by all the DIMMS in Channel2. The counter will wrap around and continue counting when it reaches its limit. The data is updated by PCODE and is Read Only for all SW.
+//#device
+HSW_PCU2
+//#register_index
+0xb8
+//#bit_mask
+(0xFFFFFFFF)
+//#restricted_settings
+readonly
+//#processor_groups
+haswell_ep

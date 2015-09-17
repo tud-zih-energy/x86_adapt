@@ -1,0 +1,10 @@
+//#description
+prefetch IO-access disable. Reset: 1. BIOS: 0. 1=Disables IO requests from triggering prefetch requests.
+//#device
+NB_F2
+//#register_index
+0x11C
+//#bit_mask
+(1ULL << 13)
+//#processor_groups
+fam10h,fam11h,fam15h

@@ -1,0 +1,12 @@
+//#description
+Current Performance State Value.
+//#device
+MSR
+//#register_index
+0x00000198
+//#bit_mask
+(0xFFULL)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge, ivybridge, haswell

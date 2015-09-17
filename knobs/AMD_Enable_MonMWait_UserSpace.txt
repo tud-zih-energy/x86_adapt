@@ -1,0 +1,10 @@
+//#description
+Enables MONITOR/MWAIT in user-space
+//#device
+MSR
+//#register_index
+0xC0010015
+//#bit_mask
+(1ULL<<10)
+//#processor_groups
+fam15h,fam12h,fam11h,fam10h

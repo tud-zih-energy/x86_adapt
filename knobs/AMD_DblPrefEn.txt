@@ -1,0 +1,10 @@
+//#description
+double prefetch enable. Read-write. Reset: 0. 1=The memory prefetcher only generates prefetch requests when it is able to generate a pair of prefetch requests to consecutive cache lines.
+//#device
+NB_F2
+//#register_index
+0x1B0
+//#bit_mask
+(1ULL << 20)
+//#processor_groups
+fam15h

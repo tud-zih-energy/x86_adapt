@@ -1,0 +1,10 @@
+//#description
+Give D-cache requests aggressively priority over I-cache requests
+//#device
+MSR
+//#register_index
+0xC0011023
+//#bit_mask
+(1ULL<<10)
+//#processor_groups
+fam15h

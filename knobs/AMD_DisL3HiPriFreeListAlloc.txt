@@ -1,0 +1,10 @@
+//#description
+Read-write. Reset: 0. BIOS: 1. 1=Disables normal SRQ entry scheme which gives higher priority to L3 than XBAR.
+//#device
+NB_F3
+//#register_index
+0x188
+//#bit_mask
+(1ULL << 9)
+//#processor_groups
+fam15h

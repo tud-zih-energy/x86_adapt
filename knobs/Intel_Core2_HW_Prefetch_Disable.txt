@@ -1,0 +1,10 @@
+//#description
+When set, disables the hardware prefetcher operation on streams of data. When clear (default), enables the prefetch queue. Disabling of the hardware prefetcher may impact processor performance.
+//#device
+MSR
+//#register_index
+0x1A0
+//#bit_mask
+(1ULL << 9)
+//#processor_groups
+core2

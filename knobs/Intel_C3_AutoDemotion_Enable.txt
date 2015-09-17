@@ -1,0 +1,10 @@
+//#description
+When set, the processor will conditionally demote C6/C7 requests to C3 based on uncore auto-demote information.
+//#device
+MSR
+//#register_index
+0x000000e2
+//#bit_mask
+(1ULL<<25)
+//#processor_groups
+nehalem, westmere, sandybridge, ivybridge, haswell

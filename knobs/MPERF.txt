@@ -1,0 +1,12 @@
+//#description
+Accumulates core clock counts at the coordinated clock frequency, when the logical processor is in C0.
+//#device
+MSR
+//#register_index
+0x000000e8
+//#bit_mask
+0xFFFFFFFFFFFFFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+intel_aperfmperf,amd_aperfmperf

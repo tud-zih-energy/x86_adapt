@@ -1,0 +1,10 @@
+//#description
+Disables speculative ITLB reloads on AMD processors
+//#device
+MSR
+//#register_index
+0xC0011021
+//#bit_mask
+(1ULL<<9)
+//#processor_groups
+fam15h,fam11h,fam10h

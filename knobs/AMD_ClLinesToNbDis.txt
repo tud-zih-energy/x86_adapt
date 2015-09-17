@@ -1,0 +1,10 @@
+//#description
+1=Clean victims/copybacks are not sent to the NB. DC and IC caches WT/WP-IO, written to L2 when evicted but not written to L3 when evicted; 0=Clean victims/copybacks are implied to be from DRAM and are evicted from the IC/DC to the L2/L3. DC caches WT/WP-IO as NTA, which prevents the line from being written to the L2/L3 when evicted. IC does not cache WT/WP-IO. This bit has no effect if the L3 is disabled or not present.
+//#device
+MSR
+//#register_index
+0xC001102A
+//#bit_mask
+(1ULL<<15)
+//#processor_groups
+fam10h

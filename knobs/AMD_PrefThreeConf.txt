@@ -1,0 +1,10 @@
+//#description
+prefetch three-ahead confidence. Reset: 100b. BIOS: 110b. Confidence level required in order to prefetch three cachelines ahead . Confidence level = 2*N 
+//#device
+NB_F2
+//#register_index
+0x11C
+//#bit_mask
+(7ULL << 25)
+//#processor_groups
+fam10h,fam15h

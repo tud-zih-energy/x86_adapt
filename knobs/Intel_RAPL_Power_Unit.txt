@@ -1,0 +1,12 @@
+//#description
+MSR 0x606 which contains RAPL Power Unit information
+//#device
+MSR
+//#register_index
+0x606
+//#bit_mask
+0xFFFFFFFFFFFFFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge,ivybridge, haswell

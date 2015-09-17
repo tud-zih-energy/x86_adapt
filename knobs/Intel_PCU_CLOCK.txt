@@ -1,0 +1,12 @@
+//#description
+PCU clock source
+//#device
+HSW_PCU0
+//#register_index
+0x90
+//#bit_mask
+(0xFFFFFFFF)
+//#restricted_settings
+readonly
+//#processor_groups
+haswell_ep

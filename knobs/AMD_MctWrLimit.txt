@@ -1,0 +1,10 @@
+//#description
+Read-write. Reset: 1Fh. BIOS: 10h. Specifies the number of writes in the memory controller queue before they are burst into the DCTs: 00h 32; 1Dh-01h -> <32-MctWrLimit>; 1Eh->2; 1Fh->Write bursting disabled
+//#device
+NB_F2
+//#register_index
+0x11C
+//#bit_mask
+(0x1FULL << 2)
+//#processor_groups
+fam15h

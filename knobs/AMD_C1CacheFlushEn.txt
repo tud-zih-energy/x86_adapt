@@ -1,0 +1,10 @@
+//#description
+Read-write. Reset: 0. BIOS: 1. cache flush enable. 1=Enable cache flush if (D18F4x128[CoreCstateMode]==0). See 2.5.3.3.2 [C-state Cache Flush]. See. 2.5.3.5.2 [BIOS Requirements to Initialize Message Triggered C1E].
+//#device
+NB_F4
+//#register_index
+0x118
+//#bit_mask
+(1ULL << 1)
+//#processor_groups
+fam15h

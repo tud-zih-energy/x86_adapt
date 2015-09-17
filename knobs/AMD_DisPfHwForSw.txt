@@ -1,0 +1,10 @@
+//#description
+Reset: 0. 1=Disable hardware prefetches for software prefetches.
+//#device
+MSR
+//#register_index
+0xC0011022
+//#bit_mask
+(1ULL<<15)
+//#processor_groups
+fam11h,fam15h

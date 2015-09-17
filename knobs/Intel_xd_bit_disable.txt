@@ -1,0 +1,12 @@
+//#description
+Disable XD Bit
+//#device
+MSR
+//#register_index
+0x000001a0
+//#bit_mask
+(1ULL << 34)
+//#restricted_settings
+readonly
+//#processor_groups
+intel_nx

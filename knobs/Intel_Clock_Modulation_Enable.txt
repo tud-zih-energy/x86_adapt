@@ -1,0 +1,10 @@
+//#description
+MSR 0x19A, bit 4: Enable On-Demand Clock Modulation Duty Cycle
+//#device
+MSR
+//#register_index
+0x19A
+//#bit_mask
+0x10
+//#processor_groups
+sandybridge, ivybridge, haswell

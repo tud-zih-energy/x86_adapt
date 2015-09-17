@@ -1,0 +1,13 @@
+//#name
+Intel_HW_Prefetch_Disable
+//#description
+Disables HW Prefetcher. 0 == enabled; 1 == disabled
+//#device
+MSR
+//#register_index
+0x000001a4
+//#bit_mask
+0x1
+//#processor_groups
+nehalem, sandybridge, westmere, ivybridge, haswell
+

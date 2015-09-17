@@ -1,0 +1,10 @@
+//#description
+L3BanMode: L3 block aggressive neighbors mode. Read-write. Reset: 10b. Enables BAN mode and specifies the duty cycle size. A duty cycle is divided into 8 slices with BAN active on 7 slices and disabled on 1 slice. Must be disabled if L3 cache partitioning is enabled; See 2.9.4.3 [L3 Cache Partitioning].
+//#device
+NB_F3
+//#register_index
+0x1B8
+//#bit_mask
+(3ULL<<19)
+//#processor_groups
+fam15h

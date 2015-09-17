@@ -1,0 +1,10 @@
+//#description
+Disables walker sharing between cores in one module
+//#device
+MSR
+//#register_index
+0xC001102B
+//#bit_mask
+(1ULL<<42)
+//#processor_groups
+fam15h

@@ -1,0 +1,10 @@
+//#description
+cache flush timer. Read-write. BIOS: 28h. Specifies how long each core needs to stay in a C-state before it flushes its caches.00h <= 5.12 us ;7Fh-01h (<CacheFlushTmr> * 10.24us) - 5.12us <= Time <= <CacheFlushTmr> * 10.24 us
+//#device
+NB_F4
+//#register_index
+0x128
+//#bit_mask
+(0x7FULL << 5)
+//#processor_groups
+fam15h

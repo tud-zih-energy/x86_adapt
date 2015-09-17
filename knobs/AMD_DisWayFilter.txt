@@ -1,0 +1,12 @@
+//#description
+Disables way filters on AMD processors
+//#device
+MSR
+//#register_index
+0xC0011021
+//#bit_mask
+(17ULL<<3)
+//#restricted_settings
+15,0
+//#processor_groups
+piledriver

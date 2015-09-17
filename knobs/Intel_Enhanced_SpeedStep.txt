@@ -1,0 +1,10 @@
+//#description
+0 == Enhanced Intel SpeedStep Technology disabled; 1 == Enhanced Intel SpeedStep Technology enabled
+//#device
+MSR
+//#register_index
+0x000001a0
+//#bit_mask
+(1ULL << 16)
+//#processor_groups
+intel_est

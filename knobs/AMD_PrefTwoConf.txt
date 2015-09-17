@@ -1,0 +1,10 @@
+//#description
+prefetch two-ahead confidence. Reset: 011b. BIOS: 011b. Confidence level required in order to prefetch two cachelines ahead. Confidence level = 2*N 
+//#device
+NB_F2
+//#register_index
+0x11C
+//#bit_mask
+(7ULL << 22)
+//#processor_groups
+fam10h,fam15h

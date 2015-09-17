@@ -1,0 +1,12 @@
+//#description
+Increments at fixed interval (relative to TSC freq.) when the logical processor is in C0.
+//#device
+MSR
+//#register_index
+0x000000e7
+//#bit_mask
+0xFFFFFFFFFFFFFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+intel_aperfmperf,amd_aperfmperf

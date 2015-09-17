@@ -1,0 +1,10 @@
+//#description
+Disables all CU Prefetchers for AMD processors
+//#device
+MSR
+//#register_index
+0xC001102B
+//#bit_mask
+(1ULL<<18)
+//#processor_groups
+fam15h
