@@ -1,0 +1,4 @@
+//#vendor
+X86_VENDOR_INTEL
+//#features
+X86_FEATURE_NX

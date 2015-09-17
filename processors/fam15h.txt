@@ -1,0 +1,4 @@
+//#vendor
+X86_VENDOR_AMD
+//#families
+0x15
