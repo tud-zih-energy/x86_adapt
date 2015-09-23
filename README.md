@@ -25,7 +25,7 @@ A Linux kernel module, that allows changing/toggling system parameters stored in
 2. load the kernel module
 
 ```
-    # insmmod x86_adapt_driver.ko
+    # insmod x86_adapt_driver.ko
 ```
 
 Remarks:

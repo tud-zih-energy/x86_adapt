@@ -33,7 +33,7 @@ void main()
       /* get definition (for name, description, ...) of item j */
       x86_adapt_get_ci_definition(X86_ADAPT_CPU,j,&item);
       /* get setting of item j */
-      if (!x86_adapt_get_setting(fd,j,&result)){
+      if (x86_adapt_get_setting(fd,j,&result)==8){
         /* print information of item j */
         fprintf(stdout,"Setting %i %s = %llu\n",j,item->name,result);
       } else {
