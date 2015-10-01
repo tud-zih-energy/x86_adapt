@@ -94,24 +94,23 @@ static int get_configuration_items(int fd, struct x86_adapt_configuration_item *
 }
 
 /* gets the of avaible cpus or dies */
-static struct x86_adapt_avaible_devices* __get_avaible(char * path)
+int __get_avaible(char * path)
 {
     int n, i;
     char *end;
     struct dirent **namelist;
     int count = 0;
     int fd;
-    struct x86_adapt_avaible_devices * devices;
 
-	fd = open(path, O_RDONLY);
-	if (fd < 0) {
-		fprintf(stderr, "ERROR\n");
-		fprintf(stderr, "x86_adapt: failed to open '%s'!\n",path);
-		close(fd);
-		return NULL;
-	}
-	close(fd);
+    fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "x86_adapt: failed to open '%s'!\n",path);
+        return fd;
+    }
+    close(fd);
 
+    
     /* count avaible devices */
     n = scandir(path, &namelist, NULL, versionsort);
 
@@ -121,41 +120,20 @@ static struct x86_adapt_avaible_devices* __get_avaible(char * path)
             count++;
         }
     }
-
-    /* allocate memory for devices */
-    devices = malloc(sizeof(struct x86_adapt_avaible_devices) + count * sizeof(int));
-    if (devices == NULL) {
-	fprintf(stderr, "ERROR: failed to allocate memory!\n");
-	return NULL;
-    }
-    /* have the devices pointer point to the end of the struct where we allocated additional memory for the entries */
-    devices->devices = (int*)(((char*)devices) + sizeof(struct x86_adapt_avaible_devices));
-    devices->count=count;
-    count = 0;
-
-    /* add devices to struct */
-    for(i=0;i<devices->count;i++) {
-        int x = strtol(namelist[i]->d_name, &end, 10);
-        if(! *end) {
-            devices->devices[count++] = x;
-        }
-        free(namelist[i]);
-    }
-    free(namelist);
-
-    return devices;
+    return count;
 }
 
-/* This looks up the number of avaible cpus in /sys/devices/system/cpu/online */
-struct x86_adapt_avaible_devices* get_avaible_cpus(void)
+int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type)
 {
-    return __get_avaible("/dev/x86_adapt/cpu");
-}
-
-/* This looks up the number of avaible dies in /sys/devices/system/node/online */
-struct x86_adapt_avaible_devices* get_avaible_dies(void)
-{
-    return __get_avaible("/dev/x86_adapt/node");
+    switch (device_type)
+    {
+        case X86_ADAPT_CPU:
+            return __get_avaible("/dev/x86_adapt/cpu");
+        case X86_ADAPT_DIE:
+            return __get_avaible("/dev/x86_adapt/node");
+        default:
+            return -1;
+    }
 }
 
 /* This should initialize the library and allocate data structures */
@@ -224,7 +202,7 @@ int x86_adapt_init(void)
 }
 
 /* returns file descriptor for /dev/x86_adapt/<cpu|node>/<nr>*/
-int x86_adapt_get_device(uint32_t device_type, uint32_t nr)
+int x86_adapt_get_device(x86_adapt_device_type device_type, uint32_t nr)
 {
 	if (!initialized)
         return -EPERM;
@@ -247,7 +225,7 @@ int x86_adapt_get_device(uint32_t device_type, uint32_t nr)
 }
 
 /* returns file descriptor for /dev/x86_adapt/<cpu|node>/<nr> in read only mode*/
-int x86_adapt_get_device_ro(uint32_t device_type, uint32_t nr)
+int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr)
 {
   if (!initialized)
         return -EPERM;
@@ -270,7 +248,7 @@ int x86_adapt_get_device_ro(uint32_t device_type, uint32_t nr)
 }
 
 /* closes file descriptor */
-int x86_adapt_put_device(uint32_t device_type, uint32_t nr)
+int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr)
 {
 	if (!initialized)
         return -EPERM;
@@ -292,7 +270,7 @@ int x86_adapt_put_device(uint32_t device_type, uint32_t nr)
 
 
 /* returns file descriptor for /dev/x86_adapt/all */
-int x86_adapt_get_all_devices_ro(uint32_t device_type) {
+int x86_adapt_get_all_devices_ro(x86_adapt_device_type device_type) {
   if (!initialized)
         return -EPERM;
   if (device_type > 1)
@@ -312,7 +290,7 @@ int x86_adapt_get_all_devices_ro(uint32_t device_type) {
 }
 
 /* returns file descriptor for /dev/x86_adapt/all */
-int x86_adapt_get_all_devices(uint32_t device_type) {
+int x86_adapt_get_all_devices(x86_adapt_device_type device_type) {
 	if (!initialized)
         return -EPERM;
 	if (device_type > 1)
@@ -332,7 +310,7 @@ int x86_adapt_get_all_devices(uint32_t device_type) {
 }
 
 /* closes file descriptor */
-int x86_adapt_put_all_devices(uint32_t device_type)
+int x86_adapt_put_all_devices(x86_adapt_device_type device_type)
 {
 	if (!initialized)
         return -EPERM;
@@ -353,30 +331,30 @@ int x86_adapt_put_all_devices(uint32_t device_type)
 }
 
 /* returns the defintion of cpu/node x86_adapt configuration item */
-int x86_adapt_get_ci_definition(uint32_t device_type, uint32_t id, struct x86_adapt_configuration_item ** item)
+int x86_adapt_get_ci_definition(x86_adapt_device_type device_type, uint32_t id, struct x86_adapt_configuration_item * item)
 {
 	if (!initialized)
         return -EPERM;
-	if (device_type>1)
+	if (device_type >= X86_ADAPT_MAX)
         return -ENXIO;
 	if (id>=config_items_length[device_type])
         return -ENXIO;
-	*item=&(config_items[device_type][id]);
+	*item=config_items[device_type][id];
 	return 0;
 }
 
 /* returns number of cpu/die configuration items */
-int x86_adapt_get_number_cis(uint32_t device_type)
+int x86_adapt_get_number_cis(x86_adapt_device_type device_type)
 {
 	if (!initialized)
         return -EPERM;
-	if (device_type>1)
+	if (device_type >= X86_ADAPT_MAX)
         return -ENXIO;
 	return config_items_length[device_type];
 }
 
 /* returns the index number of the supplied configuration item */
-int x86_adapt_lookup_ci_name(uint32_t device_type, const char * name)
+int x86_adapt_lookup_ci_name(x86_adapt_device_type device_type, const char * name)
 {
     int i;
     int number_cis = x86_adapt_get_number_cis(device_type);

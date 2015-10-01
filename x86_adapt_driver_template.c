@@ -554,6 +554,8 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
 {
     u32 l = 0,h = 0,i;
     u64 orig_setting;
+
+
     /* check whether setting is valid */
     for (i = 0;i<knob.restricted_settings_length;i++)
         if (setting == knob.restricted_settings[i])
@@ -666,6 +668,7 @@ static ssize_t do_write(struct file * file, const char * buf,
         else
             return -ENXIO;
     } 
+    
 
     if ((*ppos < entries_length)) {
         u64 setting = 0;
@@ -705,12 +708,24 @@ static ssize_t do_write(struct file * file, const char * buf,
 static ssize_t cpu_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos)
 {
-    return do_write(file,buf,count,ppos,X86_ADAPT_CPU,active_knobs_cpu,active_knobs_cpu_length);
+    char kernel_buffer[8];
+    if (count != 8)
+        return -ENXIO;
+    if (copy_from_user(kernel_buffer,buf,8)!=0)
+        return -ENXIO;
+
+    return do_write(file,kernel_buffer,count,ppos,X86_ADAPT_CPU,active_knobs_cpu,active_knobs_cpu_length);
 }
 
 static ssize_t node_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos)
 {
+    char kernel_buffer[8];
+    if (count != 8)
+        return -ENXIO;
+    if (copy_from_user(kernel_buffer,buf,8)!=0)
+        return -ENXIO;
+
     return do_write(file,buf,count,ppos,X86_ADAPT_NODE,active_knobs_node,active_knobs_node_length);
 }
 

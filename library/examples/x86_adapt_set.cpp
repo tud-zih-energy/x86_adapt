@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <assert.h>
 
 extern "C"
 {
@@ -28,11 +29,13 @@ int main(int argc, char** argv)
     }
 
     int nr_cis = x86_adapt_get_number_cis(X86_ADAPT_CPU);
+    assert(nr_cis >= 0);
+
     int index;
     for (index = 0; index < nr_cis; index++)
     {
         struct x86_adapt_configuration_item* item;
-        x86_adapt_get_ci_definition(X86_ADAPT_CPU, index, &item);
+        assert (x86_adapt_get_ci_definition(X86_ADAPT_CPU, index, &item) == 0);
 
         if (knob == item->name)
         {
@@ -42,14 +45,6 @@ int main(int argc, char** argv)
     if (index == nr_cis)
     {
         std::cerr << "Could not find knob." << std::endl;
-        return -1;
-    }
-
-    struct x86_adapt_avaible_devices* cpus = get_avaible_cpus();
-
-    if (cpu >= cpus->count || cpu < 0)
-    {
-        std::cerr << "Invalid CPU" << std::endl;
         return -1;
     }
 
