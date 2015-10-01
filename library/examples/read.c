@@ -50,8 +50,10 @@ void print_header(x86_adapt_device_type type)
   {
     case X86_ADAPT_CPU:
       fprintf(stdout,"CPU;");
+      break;
     case X86_ADAPT_DIE:
       fprintf(stdout,"Node;");
+      break;
   }
   for ( ci_nr = 0 ; ci_nr < nr_items ; ci_nr++ )
   {
