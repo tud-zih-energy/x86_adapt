@@ -36,7 +36,7 @@ static int initialized=0;
 /* gets the configuration for each avaible x86_adapt configuration item */
 static int get_configuration_items(int fd, struct x86_adapt_configuration_item ** entries)
 {
-	int size_read;
+	int32_t size_read;
 	ssize_t bytes_read;
 	char * data;
 	char * read_data;
