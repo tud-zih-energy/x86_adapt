@@ -953,7 +953,7 @@ static const struct file_operations x86_adapt_def_node_fops = {
 
 };
 
-static int __cpuinit x86_adapt_device_create(int cpu)
+static int x86_adapt_device_create(int cpu)
 {
 	struct device *dev;
 
@@ -964,7 +964,7 @@ static int __cpuinit x86_adapt_device_create(int cpu)
 }
 
 /* function to manage cpu hotplug events */
-static int __cpuinit x86_adapt_cpu_callback(struct notifier_block *nfb,
+static int x86_adapt_cpu_callback(struct notifier_block *nfb,
                                 unsigned long action, void *hcpu)
 {
     unsigned int cpu = (unsigned long) hcpu;
