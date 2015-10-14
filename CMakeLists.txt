@@ -12,6 +12,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -Wstrict-prototypes -Wall -W
 set(DRIVER_SRC x86_adapt_driver.c)
 set(DRIVER_SRC_TEMPLATE x86_adapt_driver_template.c)
 set(DRIVER_MODULE x86_adapt_driver.ko)
+set(LIBRARY_INC library/include)
 
 # run python script to generate c file from template
 add_custom_command(OUTPUT ${DRIVER_SRC}
@@ -37,11 +38,20 @@ add_custom_target(x86_adapt_driver
 # build library
 add_library(${PROJECT_NAME} SHARED library/src/x86_adapt.c)
 add_library(${PROJECT_NAME}_static STATIC library/src/x86_adapt.c)
-include_directories(${PROJECT_NAME} library/include)
-include_directories(${PROJECT_NAME}_static library/include)
+include_directories(${PROJECT_NAME} ${LIBRARY_INC})
+include_directories(${PROJECT_NAME}_static ${LIBRARY_INC})
 add_dependencies(${PROJECT_NAME} x86_adapt_driver)
+
+add_executable(x86a_read library/examples/read.c)
+add_executable(x86a_write library/examples/write.c)
+include_directories(x86a_read ${LIBRARY_INC})
+include_directories(x86a_write ${LIBRARY_INC})
+target_link_libraries(x86a_read ${PROJECT_NAME}_static)
+target_link_libraries(x86a_write ${PROJECT_NAME}_static)
 
 # use make install to install files under CMAKE_INSTALL_PREFIX
 install(FILES library/include/x86_adapt.h DESTINATION include)
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION lib)
+install(TARGETS x86a_read DESTINATION bin)
+install(TARGETS x86a_write DESTINATION bin)
