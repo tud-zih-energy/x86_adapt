@@ -36,7 +36,7 @@ static int initialized=0;
 /* gets the configuration for each avaible x86_adapt configuration item */
 static int get_configuration_items(int fd, struct x86_adapt_configuration_item ** entries)
 {
-	ssize_t size_read;
+	int size_read;
 	ssize_t bytes_read;
 	char * data;
 	char * read_data;
@@ -53,7 +53,7 @@ static int get_configuration_items(int fd, struct x86_adapt_configuration_item *
 	bytes_read=pread(fd,data,size_read,0);
 	if (bytes_read < 0 || (unsigned int)bytes_read!=size_read) {
 		fprintf(stderr, "ERROR\n");
-		fprintf(stderr, "x86_adapt: Error reading definitions: %zi %zi!\n",bytes_read, size_read);
+		fprintf(stderr, "x86_adapt: Error reading definitions: %zi %i!\n",bytes_read, size_read);
 		close(fd);
 		return -EIO;
 	}
