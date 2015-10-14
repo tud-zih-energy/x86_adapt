@@ -124,7 +124,7 @@ for knob in knobs:
     text = text + "\t.knob.device="+knob.device+",\n"
     text = text + "\t.knob.register_index="+knob.register_index+",\n"
     if knob.bit_mask is None:
-	knob.bit_mask = "0xFFFFFFFFFFFFFFFF"
+        knob.bit_mask = "0xFFFFFFFFFFFFFFFF"
     text = text + "\t.knob.bitmask="+knob.bit_mask+",\n"
     start=knob.bit_mask.find('x')
     if start == -1:
