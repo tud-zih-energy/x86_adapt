@@ -6,7 +6,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-void print_help(char ** argv)
+static void print_help(char ** argv)
 {
   fprintf(stderr, "\n");
   fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", argv[0], argv[0]);
@@ -24,7 +24,7 @@ void print_help(char ** argv)
   fprintf(stderr, "This program reads all available CPU knobs from x86_adapt.\n");
 }
 
-void print_cis(x86_adapt_device_type type, int verbose)
+static void print_cis(x86_adapt_device_type type, int verbose)
 {
   struct x86_adapt_configuration_item item;
   int nr_items = x86_adapt_get_number_cis(type);
@@ -44,7 +44,7 @@ void print_cis(x86_adapt_device_type type, int verbose)
   }
 }
 
-void set_cpu(x86_adapt_device_type type, int cpu, char* knob, uint64_t new_setting,int verbose)
+static void set_cpu(x86_adapt_device_type type, int cpu, char* knob, uint64_t new_setting,int verbose)
 {
   struct x86_adapt_configuration_item item;
   int nr_items = x86_adapt_get_number_cis(type);
@@ -171,4 +171,6 @@ int main(int argc, char ** argv)
   {
     set_cpu(type, cpu, knob, new_setting,verbose);
   }
+
+  return 0;
 }

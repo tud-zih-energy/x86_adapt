@@ -6,7 +6,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-void print_help(char ** argv)
+static void print_help(char ** argv)
 {
   fprintf(stderr, "\n");
   fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", argv[0], argv[0]);
@@ -22,7 +22,7 @@ void print_help(char ** argv)
   fprintf(stderr, "This program reads all available CPU knobs from x86_adapt.\n");
 }
 
-void print_cis(x86_adapt_device_type type, int verbose)
+static void print_cis(x86_adapt_device_type type, int verbose)
 {
   struct x86_adapt_configuration_item item;
   int nr_items = x86_adapt_get_number_cis(type);
@@ -41,7 +41,7 @@ void print_cis(x86_adapt_device_type type, int verbose)
   }
 }
 
-void print_header(x86_adapt_device_type type)
+static void print_header(x86_adapt_device_type type)
 {
   int nr_items = x86_adapt_get_number_cis(type);
   int ci_nr = 0;
@@ -62,9 +62,8 @@ void print_header(x86_adapt_device_type type)
   fprintf(stdout,"\n");
 }
 
-void print_cpu(x86_adapt_device_type type, int cpu, int print_hex)
+static void print_cpu(x86_adapt_device_type type, int cpu, int print_hex)
 {
-  struct x86_adapt_configuration_item item;
   int nr_items = x86_adapt_get_number_cis(type);
   int fd = x86_adapt_get_device_ro(type, cpu);
   uint64_t result;
@@ -158,4 +157,7 @@ int main(int argc, char ** argv)
   {
     print_cpu(type, cpu, hex);
   }
+  
+
+  return 0;
 }
