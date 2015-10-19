@@ -1,0 +1,557 @@
+.TH "x86_adapt.h" 3 "Mon Oct 19 2015" "libx86adapt" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+x86_adapt.h \- Header File for libx86_adapt\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBx86_adapt_configuration_item\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBx86_adapt_device_type\fP { \fBX86_ADAPT_CPU\fP =0, \fBX86_ADAPT_DIE\fP =1, \fBX86_ADAPT_MAX\fP =2 }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBx86_adapt_init\fP (void)"
+.br
+.RI "\fIThis initializes the library and allocates data structures\&. \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_nr_avaible_devices\fP (x86_adapt_device_type device_type)"
+.br
+.RI "\fIget the number of available devices for device_type \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_device_ro\fP (x86_adapt_device_type device_type, uint32_t nr)"
+.br
+.RI "\fIget a read-only file descriptor for a specific CPU or node \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_device\fP (x86_adapt_device_type device_type, uint32_t nr)"
+.br
+.RI "\fIget a file descriptor for a specific CPU or node \fP"
+.ti -1c
+.RI "int \fBx86_adapt_put_device\fP (x86_adapt_device_type device_type, uint32_t nr)"
+.br
+.RI "\fIput a file descriptor for a specific CPU or node \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_all_devices_ro\fP (x86_adapt_device_type device_type)"
+.br
+.RI "\fIget a file descriptor for all CPUs or nodes \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_all_devices\fP (x86_adapt_device_type device_type)"
+.br
+.RI "\fIget a read-write file descriptor for all CPUs or nodes \fP"
+.ti -1c
+.RI "int \fBx86_adapt_put_all_devices\fP (x86_adapt_device_type device_type)"
+.br
+.RI "\fIput a file descriptor for a specific CPU or node \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_ci_definition\fP (x86_adapt_device_type device_type, uint32_t id, struct \fBx86_adapt_configuration_item\fP *item)"
+.br
+.RI "\fIretrieve the description of a configuration item from a device \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_number_cis\fP (x86_adapt_device_type device_type)"
+.br
+.RI "\fIretrieve the number of available configuration item for a device type \fP"
+.ti -1c
+.RI "int \fBx86_adapt_lookup_ci_name\fP (x86_adapt_device_type device_type, const char *name)"
+.br
+.RI "\fIretrieve the configuration item ID for a specific name and device type \fP"
+.ti -1c
+.RI "int \fBx86_adapt_get_setting\fP (int fd, int id, uint64_t *setting)"
+.br
+.RI "\fIget the setting of a configuration item \fP"
+.ti -1c
+.RI "int \fBx86_adapt_set_setting\fP (int fd, int id, uint64_t setting)"
+.br
+.RI "\fIchange the setting of a configuration item \fP"
+.ti -1c
+.RI "void \fBx86_adapt_finalize\fP (void)"
+.br
+.RI "\fIThis closes all still-open file descriptors and free's data structures\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Header File for libx86_adapt\&. 
+
+
+.PP
+\fBAuthor:\fP
+.RS 4
+Robert Schoene robert.schoene@tu-dresden.de
+.RE
+.PP
+x86_adapt
+.PP
+Modulkürzel : x86a 
+.PP
+\fBVersion:\fP
+.RS 4
+0\&.1 
+.RE
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "int x86_adapt_get_all_devices (x86_adapt_device_type device_type)"
+
+.PP
+get a read-write file descriptor for all CPUs or nodes The file descriptor can later be used to read values from these devices via \fBx86_adapt_get_setting()\fP The file descriptor can later be used to write values from these devices via \fBx86_adapt_set_setting()\fP Multiple calls with the same parameter will return the same file descriptor\&. Each file descriptor has to be unregistered in the library using \fBx86_adapt_put_all_devices()\fP\&. If the device has previously opened using \fBx86_adapt_get_all_devices()\fP, the file descriptor will not be updated internally and also provide write access\&. A device may be opened from several programs in parallel using \fBx86_adapt_get_all_devices_ro()\fP or from one program using \fBx86_adapt_get_all_devices()\fP The all_devices file descriptor is of limited use for reading as it returns the bitwise or'ed values from all instances of CPUs or nodes\&. However, it can be useful for writing\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a file descriptor to use later or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid
+.br
+ other depending on whether the file /dev/x86_adapt/[cpu|node]/<nr> could be opened 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+file\&.h open, \fBx86_adapt_get_setting\fP, \fBx86_adapt_set_setting\fP, \fBx86_adapt_get_all_devices_ro\fP, \fBx86_adapt_put_all_devices\fP 
+.RE
+.PP
+
+.SS "int x86_adapt_get_all_devices_ro (x86_adapt_device_type device_type)"
+
+.PP
+get a file descriptor for all CPUs or nodes The file descriptor can later be used to read values from these devices\&. The all_devices file descriptor is of limited use for reading as it returns the bitwise or'ed values from all instances of CPUs or nodes\&. Multiple calls with the same parameter will return the same file descriptor\&. Each file descriptor has to be unregistered in the library using \fBx86_adapt_put_all_devices()\fP\&. If the device has previously opened using \fBx86_adapt_get_all_devices()\fP, the file descriptor will not be updated internally and also provide write access\&. A device may be opened from several programs in parallel using \fBx86_adapt_get_all_devices_ro()\fP or from one program using \fBx86_adapt_get_all_devices()\fP 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a file descriptor to use later or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid
+.br
+ other depending on whether the file /dev/x86_adapt/[cpu|node]/<nr> could be opened 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+file\&.h open, \fBx86_adapt_get_setting\fP, \fBx86_adapt_get_device_ro\fP, \fBx86_adapt_put_all_devices\fP 
+.RE
+.PP
+
+.SS "int x86_adapt_get_ci_definition (x86_adapt_device_type device_type, uint32_t id, struct \fBx86_adapt_configuration_item\fP * item)"
+
+.PP
+retrieve the description of a configuration item from a device Returns the name, description and length in bit for a specific configuration item\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.br
+\fIid\fP the ID of the configuration item\&. The IDs are numbered sequentially starting with 0\&. The number of configuration items for a device type can be retrieved using 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBx86_adapt_get_number_cis()\fP 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIitem\&.\fP A pointer to a valid struct \fBx86_adapt_configuration_item\fP instance\&. This parameter is changed from the function! The returned strings in item\&.description and item\&.name shall not be free()d! 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+0 or ErrorCode
+.br
+ ErrorCode is: -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+file\&.h open, \fBx86_adapt_get_setting\fP, \fBx86_adapt_set_setting\fP, \fBx86_adapt_get_all_devices_ro\fP, \fBx86_adapt_get_all_devices\fP 
+.RE
+.PP
+
+.SS "int x86_adapt_get_device (x86_adapt_device_type device_type, uint32_t nr)"
+
+.PP
+get a file descriptor for a specific CPU or node The file descriptor can later be used to read or write values from or to this device Multiple calls with the same parameter will return the same file descriptor\&. Each file descriptor has to be unregistered in the library using x86_adapt_put_device\&. If the device has previously opened using x86_adapt_get_device_ro, the file descriptor will not be updated only provide read-only access\&. A device may be opened from several programs in parallel using \fBx86_adapt_get_device_ro()\fP or from one program using \fBx86_adapt_get_device()\fP 
+.PP
+.nf
+1 if (x86_adapt_init())
+2 {
+3    printf("init failed\n");
+4    exit(1);
+5 }
+6 // get device for CPU 0
+7 fd = x86_adapt_get_device(X86_ADAPT_CPU,0);
+8 if (fd < 0)
+9 {
+10    printf("open failed\n");
+11    exit(1);
+12 }
+13 // \&.\&.\&. (read or write some values from or to CPU 0)
+
+.fi
+.PP
+ 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.br
+\fInr\fP the index of the CPU or node for which you need the fd 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a file descriptor to use later or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid
+.br
+ other depending on whether the file /dev/x86_adapt/[cpu|node]/<nr> could be opened 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+file\&.h open, \fBx86_adapt_get_setting\fP, \fBx86_adapt_set_setting\fP, \fBx86_adapt_get_device\fP, \fBx86_adapt_put_device\fP 
+.RE
+.PP
+
+.SS "int x86_adapt_get_device_ro (x86_adapt_device_type device_type, uint32_t nr)"
+
+.PP
+get a read-only file descriptor for a specific CPU or node The file descriptor can later be used to read values from this device\&. Multiple calls with the same parameter will return the same file descriptor\&. Each file descriptor has to be unregistered in the library using \fBx86_adapt_put_device()\fP\&. If the device has previously opened using x86_adapt_get_device, the file descriptor will not be updated internally and also provide write access\&. A device may be opened from several programs in parallel using this function \fBx86_adapt_get_device_ro()\fP or from one program using \fBx86_adapt_get_device()\fP 
+.PP
+.nf
+1 if (x86_adapt_init())
+2 {
+3    printf("init failed\n");
+4    exit(1);
+5 }
+6 // get device for CPU 0
+7 fd = x86_adapt_get_device_ro(X86_ADAPT_CPU,0);
+8 if (fd < 0)
+9 {
+10    printf("open failed\n");
+11    exit(1);
+12 }
+13 // \&.\&.\&. (read some values from CPU 0)
+
+.fi
+.PP
+ 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.br
+\fInr\fP the index of the CPU or node for which you need the fd 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a file descriptor to use later or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid
+.br
+ other depending on whether the file /dev/x86_adapt/[cpu|node]/<nr> could be opened 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+file\&.h open, \fBx86_adapt_get_setting\fP, \fBx86_adapt_get_device_ro\fP, \fBx86_adapt_put_device\fP 
+.RE
+.PP
+
+.SS "int x86_adapt_get_nr_avaible_devices (x86_adapt_device_type device_type)"
+
+.PP
+get the number of available devices for device_type 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the number of available CPUs, resp\&. nodes or ErrorCode
+.br
+ ErrorCode depends on a call to open() 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+file\&.h open 
+.RE
+.PP
+
+.SS "int x86_adapt_get_number_cis (x86_adapt_device_type device_type)"
+
+.PP
+retrieve the number of available configuration item for a device type 
+.PP
+.nf
+1 // initialize
+2 if (x86_adapt_init())
+3 {
+4    printf("init failed\n");
+5    exit(1);
+6 }
+7 // get number of CPU definitions
+8 ret = x86_adapt_get_number_cis(X86_ADAPT_CPU);
+9 if (ret < 0)
+10 {
+11    printf("could not read number of CPU settings\n");
+12    exit(1);
+13 }
+14 // read and print all item definitions
+15 for (id=0;id<ret;id++)
+16 {
+17    struct x86_adapt_configuration_item item;
+18    if (x86_adapt_get_ci_definition(X86_ADAPT_CPU,id,&item))
+19    {
+20      printf("could not read CPU definition %d\n",id);
+21      exit(1);
+22    }
+23    else 
+24    {
+25      printf("CPU definition %d: %s (%s)\n",id,item->name, item->description);
+26    }
+27 }
+
+.fi
+.PP
+ 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+0 or ErrorCode
+.br
+ ErrorCode is: -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type is invalid 
+.RE
+.PP
+
+.SS "int x86_adapt_get_setting (int fd, int id, uint64_t * setting)"
+
+.PP
+get the setting of a configuration item 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfd\fP a file descriptor retrieved with \fBx86_adapt_get_device_ro()\fP, \fBx86_adapt_get_device()\fP, \fBx86_adapt_get_all_devices_ro()\fP, or \fBx86_adapt_get_all_devices()\fP 
+.br
+\fIid\fP the configuration item ID retrieved with \fBx86_adapt_lookup_ci_name()\fP or \fBx86_adapt_get_ci_definition()\fP 
+.br
+\fIsetting\fP a pointer to a uint64_t datastructure where the reading will be stored 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+8 or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ others depending on the kernel module 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBx86_adapt_get_device\fP, \fBx86_adapt_get_device\fP, \fBx86_adapt_get_all_devices_ro\fP, \fBx86_adapt_get_all_devices\fP, \fBx86_adapt_lookup_ci_name\fP, \fBx86_adapt_get_ci_definition\fP 
+.RE
+.PP
+
+.SS "int x86_adapt_init (void)"
+
+.PP
+This initializes the library and allocates data structures\&. 
+.PP
+\fBReturns:\fP
+.RS 4
+0 or ErrorCode ErrorCode is:
+.br
+ -EIO if files could not be read -ENOMEM if data structures could not be allocated 
+.RE
+.PP
+
+.SS "int x86_adapt_lookup_ci_name (x86_adapt_device_type device_type, const char * name)"
+
+.PP
+retrieve the configuration item ID for a specific name and device type 
+.PP
+.nf
+1 // initialize
+2 if (x86_adapt_init())
+3 {
+4    printf("init failed\n");
+5    exit(1);
+6 }
+7 // look up CPU definition I know in beforehand
+8 id = x86_adapt_lookup_ci_name(X86_ADAPT_CPU,"Intel_CORE_C3_RESIDENCY");
+9 if (id < 0)
+10 {
+11    printf("could not find Intel_CORE_C3_RESIDENCY\n");
+12    exit(1);
+13 }
+14 // \&.\&.\&. (read value from some CPU)
+
+.fi
+.PP
+ 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.br
+\fIname\fP the name of the configuration item 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+>=0 as configuration item ID or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type is invalid or name could not be found 
+.RE
+.PP
+
+.SS "int x86_adapt_put_all_devices (x86_adapt_device_type device_type)"
+
+.PP
+put a file descriptor for a specific CPU or node deregisters a file descriptor in the library\&. This function should be called as often as the file descriptor is get via \fBx86_adapt_get_all_devices_ro()\fP or \fBx86_adapt_get_all_devices()\fP 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.br
+\fInr\fP the index of the CPU or node for which you need the fd 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+0 or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid 
+.RE
+.PP
+
+.SS "int x86_adapt_put_device (x86_adapt_device_type device_type, uint32_t nr)"
+
+.PP
+put a file descriptor for a specific CPU or node deregisters a file descriptor in the library\&. This function should be called as often as the file descriptor is get via 
+.PP
+\fBSee also:\fP
+.RS 4
+\fBx86_adapt_get_device_ro\fP or 
+.PP
+\fBx86_adapt_get_device\fP 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdevice_type\fP can be X86_ADAPT_CPU or X86_ADAPT_DIE 
+.br
+\fInr\fP the index of the CPU or node for which you need the fd 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+0 or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ -ENXIO if device_type or nr is invalid 
+.RE
+.PP
+
+.SS "int x86_adapt_set_setting (int fd, int id, uint64_t setting)"
+
+.PP
+change the setting of a configuration item 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfd\fP a file descriptor retrieved with \fBx86_adapt_get_device()\fP or \fBx86_adapt_get_all_devices()\fP 
+.br
+\fIid\fP the configuration item ID retrieved with \fBx86_adapt_lookup_ci_name()\fP or \fBx86_adapt_get_ci_definition()\fP 
+.br
+\fIsetting\fP the new setting for the configuration item 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+8 or ErrorCode
+.br
+ ErrorCode is:
+.br
+ -EPERM if the library is not initialized yet
+.br
+ others depending on the kernel module (e\&.g\&. if you're to write a read-only value) 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBx86_adapt_get_device\fP, \fBx86_adapt_get_device\fP, \fBx86_adapt_lookup_ci_name\fP, \fBx86_adapt_get_ci_definition\fP 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libx86adapt from the source code\&.
