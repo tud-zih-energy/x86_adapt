@@ -12,7 +12,7 @@
 
 /**
  * @mainpage 
- * @section main X86_ADAPT Package
+ * @section main Package Description
  * @subsection intro Introduction
  * The x86_adapt library can be used to query control low-level features of the CPU. 
  * It provides safe access to machine specific registers (MSR) through a kernel module abstraction. 
@@ -31,6 +31,11 @@
  * The kernel module creates a set of device files through which it communicates. 
  * The page @ref directA describes how to use the x86_adapt kernel module directly through the device files. 
  * 
+ * @subsubsection parallelAccess Parallel access
+ * The kernel module has been designed with parallel access in mind. 
+ * Parallel read access is possible without any restrictions. 
+ * Write access to any of the MSRs will be serialized by the kernel module through kernel locks and requires no active readers to be present. 
+ * The multiple reader / single writer paradigm is implemented at the file layer so users have to pass O_RDONLY when opening the files or use the *_ro (@ref x86_adapt_get_device_ro and @ref x86_adapt_get_all_devices_ro) library functions. 
  */
 
 /**
