@@ -10,13 +10,21 @@
 * @version 0.1
 *************************************************************/
 
+/**
+ * \mainpage 
+ * \section Introduction
+ * The x86_adapt library can be used to query control low-level features of the CPU. It provides safe access to machine specific registers (MSR) through a kernel module abstraction. Through this abstraction, values can be read and written based on the configuration of the kernel module. This configuration is provided at module build time through a set of register files describing the MSR and the possible values that it can take. Any other value won't be permitted by the kernel module. 
+ * 
+ */
+
 #ifndef X86_ADAPT_LIB_H_
 #define X86_ADAPT_LIB_H_
 
 #include <stdint.h>
 
 /**
- * @typedef an enum for defining the type of device that is requested
+ * @typedef  x86_adapt_device_type
+ * \brief an enum for defining the type of device that is requested <br>
  * This can be a CPU (a hardware thread or core) or a die (resp. NUMA node)
  */
 typedef enum
@@ -27,28 +35,29 @@ typedef enum
   X86_ADAPT_MAX=2
 } x86_adapt_device_type;
 
-/* represents a single item that can be read or even be written */
+/**
+ * \struct x86_adapt_configuration_item
+ * \brief represents a single item that can be read or even be written 
+ */
 struct x86_adapt_configuration_item {
-  /* a unique name for an item that can be read or written*/
-  char * name;
-  /* a description of the item */
-  char * description;
-  /* the length of the item in bit (max. 64) */
-  int length;
+  char * name;        /**< a unique name for an item that can be read or written */
+  char * description; /**< a description of the item */ 
+  int length;         /**< the length of the item in bit (max. 64) */
 };
 
-/** @brief This initializes the library and allocates data structures
+/*!
+ * @brief This initializes the library and allocates internal data structures
  *
  * @return 0 or ErrorCode
  * ErrorCode is:<br>
- * -EIO if files could not be read
- *                   -ENOMEM if data structures could not be allocated
+ *   -EIO if files could not be read <br>
+ *   -ENOMEM if data structures could not be allocated
  */
 int x86_adapt_init(void);
 
 /** @brief get the number of available devices for device_type
  *
- * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
+ * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE from the enum x86_adapt_device_type
  * @return the number of available CPUs, resp. nodes or ErrorCode<br>
  * ErrorCode depends on a call to open() 
  * @see file.h open
@@ -190,9 +199,9 @@ int x86_adapt_get_all_devices_ro(x86_adapt_device_type device_type);
  * @return a file descriptor to use later or ErrorCode<br>
  * ErrorCode is:<br>
  * -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid<br>
- *               other depending on whether the file
- *               /dev/x86_adapt/[cpu|node]/<nr> could be opened
+ * -ENXIO if device_type or nr is invalid<br>
+ * other depending on whether the file
+ * /dev/x86_adapt/[cpu|node]/<nr> could be opened
  * @see file.h open, x86_adapt_get_setting, x86_adapt_set_setting,
  * x86_adapt_get_all_devices_ro, x86_adapt_put_all_devices
  */
@@ -205,7 +214,6 @@ int x86_adapt_get_all_devices(x86_adapt_device_type device_type);
  * as often as the file descriptor is get via x86_adapt_get_all_devices_ro()
  * or x86_adapt_get_all_devices()
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
- * @param nr the index of the CPU or node for which you need the fd
  * @return 0 or ErrorCode<br>
  * ErrorCode is:<br>
  * -EPERM if the library is not initialized yet<br>
@@ -222,7 +230,7 @@ int x86_adapt_put_all_devices(x86_adapt_device_type device_type);
  * @param id the ID of the configuration item. The IDs are numbered sequentially
  *           starting with 0. The number of configuration items for a device
  *           type can be retrieved using @see x86_adapt_get_number_cis()
- * @param item. A pointer to a valid struct x86_adapt_configuration_item instance.
+ * @param item A pointer to a valid struct x86_adapt_configuration_item instance.
  *              This parameter is changed from the function!
  *              The returned strings in item.description and item.name shall not
  *              be free()d!
