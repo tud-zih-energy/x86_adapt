@@ -8,13 +8,202 @@
 *
 * Modulkürzel : x86a
 * @version 0.1
+* 
+* \defgroup func "Functions"
 *************************************************************/
 
 /**
  * \mainpage 
- * \section Introduction
- * The x86_adapt library can be used to query control low-level features of the CPU. It provides safe access to machine specific registers (MSR) through a kernel module abstraction. Through this abstraction, values can be read and written based on the configuration of the kernel module. This configuration is provided at module build time through a set of register files describing the MSR and the possible values that it can take. Any other value won't be permitted by the kernel module. 
+ * \section X86_ADAPT Package
+ * \subsection intro Introduction
+ * The x86_adapt library can be used to query control low-level features of the CPU. 
+ * It provides safe access to machine specific registers (MSR) through a kernel module abstraction. 
+ * Through this abstraction, values can be read and written based on the configuration of the kernel module. 
+ * This configuration is provided at module build time through a set of so-called knob files describing the MSR and the possible values that it can take. 
+ * Any other value won't be permitted by the kernel module. 
+ *
+ * \subsection building Build instructions
+ * The kernel module is built using CMake. Please see the instructions in the package README.md on how built it. 
+ *
+ * \subsection kernelModule Accessing the kernel module
+ * \subsubsection Using the x86_adapt library
+ * Please see the documentation of the x86_adapt.h header file for details on how to access the MSRs through a library.
  * 
+ * \subsubsection directAccess Direct access
+ * The kernel module creates a set of device files through which it communicates. 
+ * The page \ref directA describes how to use the x86_adapt kernel module directly through the device files. 
+ * 
+ */
+
+/**
+ * \page directA Direct Access
+
+\section folders Available folders
+
+- /dev/x86_adapt/cpu - Holds devices for CPUs (hardware threads)
+- /dev/x86_adapt/node - Holds devices for nodes (NUMA nodes)
+
+\subsection files Files within these folders
+- ./definition - Definition file (see reading definitions)
+- ./all - a virtual device for reading and writing the configuration items of all instances of type cpu or node
+- ./<num> - a virtual device for reading and writing the configuration items of a specific instance of type cpu or node
+
+\section rw Reading and Writing
+
+\subsection readingDefs Reading definitions
+Read the definitions in two steps
+
+1. do a 4 byte read on offset 0 on file /dev/x86_adapt/[cpu|node]/definition
+This will return the number of bytes to read all the difinitions for cpus, resp. nodes (nr_bytes).
+This read can be skipped if it si known beforehand how large the second read should be.
+
+2. do a read with nr_bytes or more bytes on offset 0 on file /dev/x86_adapt/[cpu|node]/definition
+This will return all the information, including names, descriptions and variable lengths
+
+Read this file like
+@code
+returned = pread(fd, memory_buffer, nr_bytes, offset);
+@endcode
+@param fd the file descriptor of a definitions file (in)
+@param memory_buffer a memory buffer (out)<br>
+ The kernel will write configuration item definitions to this buffer until (a)
+ the buffer is full or (b) all configuration items are written.<br>
+ See the code section below for an encoding of the memory_buffer
+@param nr_bytes the size of the memory buffer (in)
+@param offset is ignored, should be 0 (in)
+@return the number of bytes written to memory_buffer or ErrorCode<br>
+ Errorcode can be:<br>
+ - -EFAULT the kernel could not copy information to the memory_buffer
+ - -ENOMEM nr_bytes < 4
+
+
+@code
+
+struct configuration_item_entry
+{
+  // the ids are enumerated, so the first configuration_item_entry
+  // in a struct memory_buffer_encoding will have id 0, the second entry id 1,
+  // the n-th entry n-1
+  int32_t id;
+  uint8_t length_in_bit;
+  // length of name field
+  int32_t name_length;
+  // name of the item (does not contain an ending \0)
+  char name[name_length];
+  // length of description field
+  int32_t description_length;
+  // description of the item (does not contain an ending \0)
+  char description[description_length];
+}
+
+struct memory_buffer_encoding
+{
+  int32_t total_length_in_byte;
+  // if there is any configuration_item
+  // check total_length_in_byte to see if there are more entries to come
+  struct configuration_item_entry entry_0;
+  // if there is a second configuration_item
+  struct configuration_item_entry entry_1;
+  // if there is a third configuration_item
+  struct configuration_item_entry entry_2;
+  // ...
+}
+
+uint32_t size_read;
+size_t bytes;
+char * information;
+int fd = open("/dev/x86_adapt/cpu/definition",O_RDONLY)
+bytes = pread(fd, &size_read, 4, 0);
+if (bytes != 4)
+{
+  printf("Error initial reading /dev/x86_adapt/cpu/definition: %d",size_read);
+  exit(1);
+}
+information=malloc(bytes);
+bytes = pread(fd,memory_buffer,size_read,0);
+if (bytes != size_read )
+{
+  printf("Error second reading /dev/x86_adapt/cpu/definition: %d",size_read);
+  exit(1);
+}
+// information holds now struct memory_buffer_encoding
+...
+@endcode
+
+\subsection readSettings Reading settings
+Read an 8 byte value with the setting to /dev/x86_adapt/[cpu|node]/<nr> at a certain offset
+via 
+@code
+returned = pread(fd, memory_buffer, nr_bytes, id);
+@endcode
+@param fd the file descriptor of a configuration device file (in)
+@param memory_buffer a memory buffer which can hold 8 byte (e.g., a pointer to an uint64) (out)<br>
+ The kernel will write the reading of the item with the given id to this buffer
+ If the fd links to an ./all file, the items of all available
+ cpus or nodes will be bitwise ored
+@param nr_bytes MUST be 8 (in)
+@param id is the id of a configuration item which can be retrieved by reading it from
+ /dev/x86_adapt/[cpu|node]/definition (in)
+@return the number of bytes written to reading or ErrorCode<br>
+ Errorcode can be:<br>
+ - -EFAULT the kernel could not copy information to the memory_buffer or nr_bytes is != 8
+ - -ENXIO the id is invalid
+
+@code
+uint64_t value;
+size_t bytes;
+int fd = open("/dev/x86_adapt/cpu/0",O_RDONLY);
+if (fd < 0)
+{
+  printf("Error opening /dev/x86_adapt/cpu/0: %d",fd);
+  exit(1);
+}
+bytes = pread(fd, &value, 8, 0);
+if (bytes != 8)
+{
+  printf("Error reading /dev/x86_adapt/cpu/0: %d",size_read);
+  exit(1);
+}
+printf("Configuration item 0 has setting %"PRIu64"\n",value);
+@endcode
+
+\subsection writeSettings Writing settings
+Write an 8 byte value with the setting to /dev/x86_adapt/[cpu|node]/<nr> at a certain offset via
+@code
+returned = pread(fd, memory_buffer, nr_bytes, id);
+@endcode
+@param fd the file descriptor of a configuration device file (in)
+@param memory_buffer a memory buffer which can hold 8 byte (e.g., a pointer to an uint64) (out)<br>
+ The kernel will write the reading of the the setting in this buffer to the device(s)
+ If the fd links to an ./all file, the items of all available
+ cpus or nodes will be written
+@param nr_bytes MUST be 8 (in)
+@param id is the id of a configuration item which can be retrieved by reading it from
+ /dev/x86_adapt/[cpu|node]/definition (in)
+@return the number of bytes written to reading or ErrorCode<br>
+ Errorcode can be:
+ - -EFAULT the kernel could not copy information from the memory_buffer or nr_bytes is != 8
+ - -ENXIO the id is invalid, the device could not be found internally
+ - -EINVAL if the setting is restricted / reserved
+ - -EPERM if it is a read-only setting
+
+@code
+uint64_t value=0;
+size_t bytes;
+int fd = open("/dev/x86_adapt/cpu/0",O_RDWR);
+if (fd < 0)
+{
+  printf("Error opening /dev/x86_adapt/cpu/0: %d",fd);
+  exit(1);
+}
+bytes = pwrite(fd, &value, 8, 0);
+if (bytes != 8)
+{
+  printf("Error writing /dev/x86_adapt/cpu/0: %d",size_read);
+  exit(1);
+}
+printf("Set configuration item 0 of CPU 0 to %"PRIu64"\n",value);
+@endcode
  */
 
 #ifndef X86_ADAPT_LIB_H_
@@ -47,11 +236,10 @@ struct x86_adapt_configuration_item {
 
 /*!
  * @brief This initializes the library and allocates internal data structures
- *
  * @return 0 or ErrorCode
  * ErrorCode is:<br>
- *   -EIO if files could not be read <br>
- *   -ENOMEM if data structures could not be allocated
+ *   - -EIO if files could not be read <br>
+ *   - -ENOMEM if data structures could not be allocated
  */
 int x86_adapt_init(void);
 
@@ -93,10 +281,10 @@ int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type);
  * @param nr the index of the CPU or node for which you need the fd
  * @return a file descriptor to use later or ErrorCode<br>
  * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid<br>
- *               other depending on whether the file
- *               /dev/x86_adapt/[cpu|node]/<nr> could be opened
+ * - -EPERM if the library is not initialized yet<br>
+ * - -ENXIO if device_type or nr is invalid<br>
+ * - other depending on whether the file
+ *   /dev/x86_adapt/[cpu|node]/<nr> could be opened
  * @see file.h open, x86_adapt_get_setting, x86_adapt_get_device_ro, x86_adapt_put_device
  */
 int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr);
@@ -131,10 +319,10 @@ int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr);
  * @param nr the index of the CPU or node for which you need the fd
  * @return a file descriptor to use later or ErrorCode<br>
  * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid<br>
- *               other depending on whether the file
- *               /dev/x86_adapt/[cpu|node]/<nr> could be opened
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type or nr is invalid
+ * - other depending on whether the file
+ *   /dev/x86_adapt/[cpu|node]/<nr> could be opened
  * @see file.h open, x86_adapt_get_setting, x86_adapt_set_setting, x86_adapt_get_device, x86_adapt_put_device
  */
 int x86_adapt_get_device(x86_adapt_device_type device_type, uint32_t nr);
@@ -148,8 +336,8 @@ int x86_adapt_get_device(x86_adapt_device_type device_type, uint32_t nr);
  * @param nr the index of the CPU or node for which you need the fd
  * @return 0 or ErrorCode<br>
  * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type or nr is invalid
  */
 int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr);
 
@@ -169,10 +357,10 @@ int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr);
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
  * @return a file descriptor to use later or ErrorCode<br>
  * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid<br>
- *               other depending on whether the file
- *               /dev/x86_adapt/[cpu|node]/<nr> could be opened
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type or nr is invalid
+ * - other depending on whether the file
+ *   /dev/x86_adapt/[cpu|node]/<nr> could be opened
  * @see file.h open, x86_adapt_get_setting, x86_adapt_get_device_ro, 
  *      x86_adapt_put_all_devices
  */
@@ -197,10 +385,10 @@ int x86_adapt_get_all_devices_ro(x86_adapt_device_type device_type);
  * be useful for writing.
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
  * @return a file descriptor to use later or ErrorCode<br>
- * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- * -ENXIO if device_type or nr is invalid<br>
- * other depending on whether the file
+ * ErrorCode is:
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type or nr is invalid
+ * - other depending on whether the file
  * /dev/x86_adapt/[cpu|node]/<nr> could be opened
  * @see file.h open, x86_adapt_get_setting, x86_adapt_set_setting,
  * x86_adapt_get_all_devices_ro, x86_adapt_put_all_devices
@@ -215,9 +403,9 @@ int x86_adapt_get_all_devices(x86_adapt_device_type device_type);
  * or x86_adapt_get_all_devices()
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
  * @return 0 or ErrorCode<br>
- * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid
+ * ErrorCode is:
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type or nr is invalid
  */
 int x86_adapt_put_all_devices(x86_adapt_device_type device_type);
 
@@ -235,8 +423,9 @@ int x86_adapt_put_all_devices(x86_adapt_device_type device_type);
  *              The returned strings in item.description and item.name shall not
  *              be free()d!
  * @return 0 or ErrorCode<br>
- * ErrorCode is: -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type or nr is invalid
+ * ErrorCode is: 
+ * - -EPERM if the library is not initialized yet
+ * - ENXIO if device_type or nr is invalid
  * @see file.h open, x86_adapt_get_setting, x86_adapt_set_setting,
  * x86_adapt_get_all_devices_ro, x86_adapt_get_all_devices
  */
@@ -275,8 +464,9 @@ int x86_adapt_get_ci_definition(x86_adapt_device_type device_type, uint32_t id,s
  * @endcode
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
  * @return 0 or ErrorCode<br>
- * ErrorCode is: -EPERM if the library is not initialized yet<br>
- *               -ENXIO if device_type is invalid
+ * ErrorCode is: 
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type is invalid
  */
 int x86_adapt_get_number_cis(x86_adapt_device_type device_type);
 
@@ -301,9 +491,9 @@ int x86_adapt_get_number_cis(x86_adapt_device_type device_type);
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
  * @param name the name of the configuration item
  * @return >=0 as configuration item ID or ErrorCode<br>
- * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- * -ENXIO if device_type is invalid or name could not be found
+ * ErrorCode is:
+ * - -EPERM if the library is not initialized yet
+ * - -ENXIO if device_type is invalid or name could not be found
  */
 int x86_adapt_lookup_ci_name(x86_adapt_device_type device_type, const char * name);
 
@@ -318,9 +508,9 @@ int x86_adapt_lookup_ci_name(x86_adapt_device_type device_type, const char * nam
  * @param setting a pointer to a uint64_t datastructure where the reading will
  * be stored
  * @return 8 or ErrorCode<br>
- * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- * others depending on the kernel module
+ * ErrorCode is:
+ * - -EPERM if the library is not initialized yet
+ * - others depending on the kernel module
  * @see x86_adapt_get_device, x86_adapt_get_device,
  * x86_adapt_get_all_devices_ro, x86_adapt_get_all_devices,
  * x86_adapt_lookup_ci_name, x86_adapt_get_ci_definition
@@ -336,10 +526,9 @@ int x86_adapt_get_setting(int fd, int id, uint64_t * setting);
  * or x86_adapt_get_ci_definition()
  * @param setting the new setting for the configuration item
  * @return 8 or ErrorCode<br>
- * ErrorCode is:<br>
- * -EPERM if the library is not initialized yet<br>
- * others depending on the kernel module (e.g. if you're to write
- *               a read-only value)
+ * ErrorCode is:
+ * - -EPERM if the library is not initialized yet
+ * - others depending on the kernel module (e.g. if you're to write a read-only value)
  * @see x86_adapt_get_device, x86_adapt_get_device, x86_adapt_lookup_ci_name,
  * x86_adapt_get_ci_definition
  */
