@@ -13,44 +13,44 @@
 *************************************************************/
 
 /**
- * \mainpage 
- * \section X86_ADAPT Package
- * \subsection intro Introduction
+ * @mainpage 
+ * @section main X86_ADAPT Package
+ * @subsection intro Introduction
  * The x86_adapt library can be used to query control low-level features of the CPU. 
  * It provides safe access to machine specific registers (MSR) through a kernel module abstraction. 
  * Through this abstraction, values can be read and written based on the configuration of the kernel module. 
  * This configuration is provided at module build time through a set of so-called knob files describing the MSR and the possible values that it can take. 
  * Any other value won't be permitted by the kernel module. 
  *
- * \subsection building Build instructions
+ * @subsection building Build instructions
  * The kernel module is built using CMake. Please see the instructions in the package README.md on how built it. 
  *
- * \subsection kernelModule Accessing the kernel module
- * \subsubsection Using the x86_adapt library
+ * @subsection kernelModule Accessing the kernel module
+ * @subsubsection libAccess Using the x86_adapt library
  * Please see the documentation of the x86_adapt.h header file for details on how to access the MSRs through a library.
  * 
- * \subsubsection directAccess Direct access
+ * @subsubsection directAccess Direct access
  * The kernel module creates a set of device files through which it communicates. 
- * The page \ref directA describes how to use the x86_adapt kernel module directly through the device files. 
+ * The page @ref directA describes how to use the x86_adapt kernel module directly through the device files. 
  * 
  */
 
 /**
- * \page directA Direct Access
+ * @page directA Direct Access
 
-\section folders Available folders
+@section folders Available folders
 
 - /dev/x86_adapt/cpu - Holds devices for CPUs (hardware threads)
 - /dev/x86_adapt/node - Holds devices for nodes (NUMA nodes)
 
-\subsection files Files within these folders
+@subsection files Files within these folders
 - ./definition - Definition file (see reading definitions)
 - ./all - a virtual device for reading and writing the configuration items of all instances of type cpu or node
 - ./<num> - a virtual device for reading and writing the configuration items of a specific instance of type cpu or node
 
-\section rw Reading and Writing
+@section rw Reading and Writing
 
-\subsection readingDefs Reading definitions
+@subsection readingDefs Reading definitions
 Read the definitions in two steps
 
 1. do a 4 byte read on offset 0 on file /dev/x86_adapt/[cpu|node]/definition
@@ -130,7 +130,7 @@ if (bytes != size_read )
 ...
 @endcode
 
-\subsection readSettings Reading settings
+@subsection readSettings Reading settings
 Read an 8 byte value with the setting to /dev/x86_adapt/[cpu|node]/<nr> at a certain offset
 via 
 @code
@@ -167,7 +167,7 @@ if (bytes != 8)
 printf("Configuration item 0 has setting %"PRIu64"\n",value);
 @endcode
 
-\subsection writeSettings Writing settings
+@subsection writeSettings Writing settings
 Write an 8 byte value with the setting to /dev/x86_adapt/[cpu|node]/<nr> at a certain offset via
 @code
 returned = pread(fd, memory_buffer, nr_bytes, id);
