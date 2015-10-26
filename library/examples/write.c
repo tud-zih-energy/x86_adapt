@@ -6,6 +6,23 @@
 #include <getopt.h>
 #include <stdlib.h>
 
+/*************************************/
+/**
+ * @file write.c
+ * @brief Example application to set the value of a x86_adapt knob on the system. 
+ * 
+ * Please see the help text (-h) for details on how to use it. 
+ * The most common way is to specify the option or knob via -o and the value to be set via -V:
+ * @code 
+ * ./x86a_write -o Intel_Package_CState_Limit -V 3
+ * @endcode
+
+ * Use the tool x86a_read described in @ref read.c to query all available knobs on the system.
+ * 
+ * @author Robert Schoene robert.schoene@tu-dresden.de 
+ *************************************/ 
+
+
 static void print_help(char ** argv)
 {
   fprintf(stderr, "\n");
