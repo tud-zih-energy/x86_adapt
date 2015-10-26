@@ -6,6 +6,33 @@
 #include <getopt.h>
 #include <stdlib.h>
 
+/*************************************/
+/**
+ * @file read.c
+ * @brief Example application to read the value of all available knobs on the system. 
+ * 
+ * Please see the help text (-h) for details on how to use it. 
+ * 
+ * Invoking the x86a_read tool prints a list of knobs:
+ * @code
+ * Item 0: Intel_Clock_Modulation_Extended_Value
+ * ----------------
+ * Item 1: Intel_DCU_Prefetch_Disable
+ * ----------------
+ * Item 2: Intel_Enhanced_SpeedStep
+ * ----------------
+ * Item 3: Intel_Target_PState
+ * ----------------
+ * Item 4: Intel_Extended_Clock_Modulation_Extended
+ * [...]
+ * @endcode
+ * Add \-\-verbose to get a short description of each knob. <br> 
+ * The tool also prints a the current settings of each knob as CSV.
+ *
+ * @author Robert Schoene robert.schoene@tu-dresden.de 
+ */
+
+
 static void print_help(char ** argv)
 {
   fprintf(stderr, "\n");
