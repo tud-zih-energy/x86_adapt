@@ -8,7 +8,7 @@
 
 /*************************************/
 /**
- * @file write.c
+ * @file x86a_write.c
  * @brief Example application to set the value of a x86_adapt knob on the system. 
  * 
  * Please see the help text (-h) for details on how to use it. 
@@ -16,8 +16,8 @@
  * @code 
  * ./x86a_write -o Intel_Package_CState_Limit -V 3
  * @endcode
-
- * Use the tool x86a_read described in @ref x86a_read.c to query all available knobs on the system.
+ *
+ * Use the tool @ref x86a_read.c "x86a_read" to query all available knobs and their values on the system.
  * 
  * @author Robert Schoene robert.schoene@tu-dresden.de 
  *************************************/ 

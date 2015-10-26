@@ -8,8 +8,8 @@
 
 /*************************************/
 /**
- * @file read.c
- * @brief Example application to read the value of all available knobs on the system. 
+ * @file x86a_read.c
+ * @brief Example application to read the values of all available knobs on the system. 
  * 
  * Please see the help text (-h) for details on how to use it. 
  * 
@@ -29,7 +29,7 @@
  * Add \-\-verbose to get a short description of each knob. <br> 
  * The tool also prints a the current settings of each knob as CSV.
  * 
- * Use the tool x86a_write described in @ref x86a_write.c tool to change a setting.
+ * Use the tool @ref x86a_write.c "x86a_write" to change a setting.
  *
  * @author Robert Schoene robert.schoene@tu-dresden.de 
  */
