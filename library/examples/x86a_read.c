@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <libgen.h>
 
 /*************************************/
 /**
@@ -37,8 +38,10 @@
 
 static void print_help(char ** argv)
 {
+  char *path = strdup(argv[0]);
+  char *base = basename(path);
   fprintf(stderr, "\n");
-  fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", argv[0], argv[0]);
+  fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", base, base);
   fprintf(stderr, "\n");
   fprintf(stderr, "%s-ARGS:\n",argv[0]);
   fprintf(stderr, "\t -h --help: print this help\n");
@@ -49,6 +52,7 @@ static void print_help(char ** argv)
   fprintf(stderr, "\t -v --verbose: print more information\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "This program reads all available CPU knobs from x86_adapt.\n");
+  free(path);
 }
 
 static void print_cis(x86_adapt_device_type type, int verbose)
