@@ -31,7 +31,7 @@ static void print_help(char ** argv)
   fprintf(stderr, "\n");
   fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", base, base);
   fprintf(stderr, "\n");
-  fprintf(stderr, "%s-ARGS:\n",argv[0]);
+  fprintf(stderr, "%s-ARGS:\n", base);
   fprintf(stderr, "\t -h --help: print this help\n");
   fprintf(stderr, "\t -H --hex: set in hexadecimal form\n");
   fprintf(stderr, "\t -d --die: set die options instead of CPU options\n");
