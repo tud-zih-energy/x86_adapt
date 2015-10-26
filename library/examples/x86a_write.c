@@ -17,7 +17,7 @@
  * ./x86a_write -o Intel_Package_CState_Limit -V 3
  * @endcode
 
- * Use the tool x86a_read described in @ref read.c to query all available knobs on the system.
+ * Use the tool x86a_read described in @ref x86a_read.c to query all available knobs on the system.
  * 
  * @author Robert Schoene robert.schoene@tu-dresden.de 
  *************************************/ 

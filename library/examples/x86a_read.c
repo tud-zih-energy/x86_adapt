@@ -29,7 +29,7 @@
  * Add \-\-verbose to get a short description of each knob. <br> 
  * The tool also prints a the current settings of each knob as CSV.
  * 
- * Use the tool x86a_write described in @ref write.c tool to change a setting.
+ * Use the tool x86a_write described in @ref x86a_write.c tool to change a setting.
  *
  * @author Robert Schoene robert.schoene@tu-dresden.de 
  */
