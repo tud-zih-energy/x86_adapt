@@ -87,6 +87,9 @@ static void print_header(x86_adapt_device_type type)
     case X86_ADAPT_DIE:
       fprintf(stdout,"Node;");
       break;
+    default:
+      fprintf(stderr, "WARN: unknown type!\n");
+      break;
   }
   for ( ci_nr = 0 ; ci_nr < nr_items ; ci_nr++ )
   {
