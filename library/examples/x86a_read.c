@@ -5,13 +5,45 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <libgen.h>
+
+/*************************************/
+/**
+ * @file x86a_read.c
+ * @brief Example application to read the values of all available knobs on the system. 
+ * 
+ * Please see the help text (-h) for details on how to use it. 
+ * 
+ * Invoking the x86a_read tool prints a list of knobs:
+ * @code
+ * Item 0: Intel_Clock_Modulation_Extended_Value
+ * ----------------
+ * Item 1: Intel_DCU_Prefetch_Disable
+ * ----------------
+ * Item 2: Intel_Enhanced_SpeedStep
+ * ----------------
+ * Item 3: Intel_Target_PState
+ * ----------------
+ * Item 4: Intel_Extended_Clock_Modulation_Extended
+ * [...]
+ * @endcode
+ * Add \-\-verbose to get a short description of each knob. <br> 
+ * The tool also prints a the current settings of each knob as CSV.
+ * 
+ * Use the tool @ref x86a_write.c "x86a_write" to change a setting.
+ *
+ * @author Robert Schoene robert.schoene@tu-dresden.de 
+ */
+
 
 static void print_help(char ** argv)
 {
+  char *path = strdup(argv[0]);
+  char *base = basename(path);
   fprintf(stderr, "\n");
-  fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", argv[0], argv[0]);
+  fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", base, base);
   fprintf(stderr, "\n");
-  fprintf(stderr, "%s-ARGS:\n",argv[0]);
+  fprintf(stderr, "%s-ARGS:\n", base);
   fprintf(stderr, "\t -h --help: print this help\n");
   fprintf(stderr, "\t -H --hex: print results in hexadecimal form\n");
   fprintf(stderr, "\t -d --die: print die options instead of CPU options\n");
@@ -20,6 +52,7 @@ static void print_help(char ** argv)
   fprintf(stderr, "\t -v --verbose: print more information\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "This program reads all available CPU knobs from x86_adapt.\n");
+  free(path);
 }
 
 static void print_cis(x86_adapt_device_type type, int verbose)
@@ -53,6 +86,9 @@ static void print_header(x86_adapt_device_type type)
       break;
     case X86_ADAPT_DIE:
       fprintf(stdout,"Node;");
+      break;
+    default:
+      fprintf(stderr, "WARN: unknown type!\n");
       break;
   }
   for ( ci_nr = 0 ; ci_nr < nr_items ; ci_nr++ )

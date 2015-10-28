@@ -31,6 +31,8 @@
  * The kernel module creates a set of device files through which it communicates. 
  * The page @ref directA describes how to use the x86_adapt kernel module directly through the device files. 
  * 
+ * Two example tools are available as @ref x86a_read.c "x86a_read" and @ref x86a_write.c "x86a_write" that allow direct read and write access from the command line and serve as an example on how to use the library.
+ * 
  * @subsubsection parallelAccess Parallel access
  * The kernel module has been designed with parallel access in mind. 
  * Parallel read access is possible without any restrictions. 

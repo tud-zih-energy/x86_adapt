@@ -5,13 +5,33 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <libgen.h>
+
+/*************************************/
+/**
+ * @file x86a_write.c
+ * @brief Example application to set the value of a x86_adapt knob on the system. 
+ * 
+ * Please see the help text (-h) for details on how to use it. 
+ * The most common way is to specify the option or knob via -o and the value to be set via -V:
+ * @code 
+ * ./x86a_write -o Intel_Package_CState_Limit -V 3
+ * @endcode
+ *
+ * Use the tool @ref x86a_read.c "x86a_read" to query all available knobs and their values on the system.
+ * 
+ * @author Robert Schoene robert.schoene@tu-dresden.de 
+ *************************************/ 
+
 
 static void print_help(char ** argv)
 {
+  char *path = strdup(argv[0]);
+  char *base = basename(path);
   fprintf(stderr, "\n");
-  fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", argv[0], argv[0]);
+  fprintf(stderr, "Usage: %s [ %s-ARGS ...] \"COMMAND [ ARGS ...]\"\n", base, base);
   fprintf(stderr, "\n");
-  fprintf(stderr, "%s-ARGS:\n",argv[0]);
+  fprintf(stderr, "%s-ARGS:\n", base);
   fprintf(stderr, "\t -h --help: print this help\n");
   fprintf(stderr, "\t -H --hex: set in hexadecimal form\n");
   fprintf(stderr, "\t -d --die: set die options instead of CPU options\n");
@@ -22,6 +42,7 @@ static void print_help(char ** argv)
   fprintf(stderr, "\t -v --verbose: print more information\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "This program reads all available CPU knobs from x86_adapt.\n");
+  free(path);
 }
 
 static void print_cis(x86_adapt_device_type type, int verbose)
