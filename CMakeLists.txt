@@ -9,31 +9,54 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -Wstrict-prototypes -Wall -W
 
 
 # kernel module names
+set(SUPPORT_DRIVER_SRC x86_adapt_defs.c)
+set(SUPPORT_DRIVER_SRC_TEMPLATE definition_driver/x86_adapt_defs_template.c)
+set(SUPPORT_DRIVER_MODULE x86_adapt_defs.ko)
+
 set(DRIVER_SRC x86_adapt_driver.c)
-set(DRIVER_SRC_TEMPLATE x86_adapt_driver_template.c)
 set(DRIVER_MODULE x86_adapt_driver.ko)
+
 set(LIBRARY_INC library/include)
 
 # run python script to generate c file from template
-add_custom_command(OUTPUT ${DRIVER_SRC}
+add_custom_command(OUTPUT ${SUPPORT_DRIVER_SRC}
                     COMMAND ./prepare.py ${CMAKE_BINARY_DIR}
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    DEPENDS ${DRIVER_SRC_TEMPLATE}
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/definition_driver
+                    DEPENDS ${SUPPORT_DRIVER_SRC_TEMPLATE}
                   )
 
-# build module
-add_custom_command(OUTPUT ${DRIVER_MODULE}
-                   COMMAND echo "obj-m += x86_adapt_driver.o" > Kbuild
+# build support module
+add_custom_command(OUTPUT ${SUPPORT_DRIVER_MODULE}
+                   COMMAND echo "obj-m += x86_adapt_defs.o" > Kbuild
+                   COMMAND echo "MY_CFLAGS += -g -DDEBUG"  >> Kbuild
+                   COMMAND echo "ccflags-y += ${MY_CFLAGS}"  >> Kbuild
+                   COMMAND echo "CC += ${MY_CFLAGS}" >> Kbuild
                    COMMAND make W=1 -C  /lib/modules/`uname -r`/build M=`pwd`
-                   DEPENDS ${DRIVER_SRC}
+                   DEPENDS ${SUPPORT_DRIVER_SRC}
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                   )
 
-# add target to build module
+
+# build module
+add_custom_command(OUTPUT ${DRIVER_MODULE}
+                   COMMAND cp ${CMAKE_SOURCE_DIR}/driver/x86_adapt_driver.c `pwd`
+                   COMMAND echo "obj-m += x86_adapt_driver.o" > Kbuild
+                   COMMAND echo "MY_CFLAGS += -g -DDEBUG"  >> Kbuild
+                   COMMAND echo "ccflags-y += ${MY_CFLAGS}"  >> Kbuild
+                   COMMAND echo "CC += ${MY_CFLAGS}" >> Kbuild
+                   COMMAND make W=1 -C  /lib/modules/`uname -r`/build M=`pwd`
+                   DEPENDS ${SUPPORT_DRIVER_MODULE}
+                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                  )
+
+# add target to build support module
 add_custom_target(x86_adapt_driver
                   DEPENDS ${DRIVER_MODULE}
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                  )
+
+execute_process(COMMAND uname -r OUTPUT_VARIABLE KERNEL_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 
 # build library
 add_library(${PROJECT_NAME} SHARED library/src/x86_adapt.c)
@@ -55,3 +78,5 @@ install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION lib)
 install(TARGETS x86a_read DESTINATION bin)
 install(TARGETS x86a_write DESTINATION bin)
+#install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR} modules_install)")
+
