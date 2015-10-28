@@ -9,29 +9,31 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -Wstrict-prototypes -Wall -W
 
 
 # kernel module names
-set(SUPPORT_DRIVER_SRC x86_adapt_defs.c)
+set(SUPPORT_DRIVER_SRC ${CMAKE_BINARY_DIR}/kernel_module/definition_driver/x86_adapt_defs.c)
 set(SUPPORT_DRIVER_SRC_TEMPLATE definition_driver/x86_adapt_defs_template.c)
-set(SUPPORT_DRIVER_MODULE x86_adapt_defs.ko)
+set(SUPPORT_DRIVER_MODULE kernel_module/definition_driver/Kbuild)
 
 set(DRIVER_SRC x86_adapt_driver.c)
-set(DRIVER_MODULE x86_adapt_driver.ko)
+set(DRIVER_MODULE kernel_module/driver/x86_adapt_driver.ko)
 
 set(LIBRARY_INC library/include)
 
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/kernel_module)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/kernel_module/definition_driver)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/kernel_module/driver)
+
 # run python script to generate c file from template
 add_custom_command(OUTPUT ${SUPPORT_DRIVER_SRC}
-                    COMMAND ./prepare.py ${CMAKE_BINARY_DIR}
+                    COMMAND ./prepare.py ${CMAKE_BINARY_DIR}/kernel_module/definition_driver
+                    COMMAND cp ${CMAKE_SOURCE_DIR}/definition_driver/*.h  ${CMAKE_BINARY_DIR}/kernel_module/definition_driver
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/definition_driver
                     DEPENDS ${SUPPORT_DRIVER_SRC_TEMPLATE}
                   )
 
 # build support module
 add_custom_command(OUTPUT ${SUPPORT_DRIVER_MODULE}
-                   COMMAND echo "obj-m += x86_adapt_defs.o" > Kbuild
-                   COMMAND echo "MY_CFLAGS += -g -DDEBUG"  >> Kbuild
-                   COMMAND echo "ccflags-y += ${MY_CFLAGS}"  >> Kbuild
-                   COMMAND echo "CC += ${MY_CFLAGS}" >> Kbuild
-                   COMMAND make W=1 -C  /lib/modules/`uname -r`/build M=`pwd`
+                   COMMAND echo "obj-m += x86_adapt_defs.o" > kernel_module/definition_driver/Kbuild
                    DEPENDS ${SUPPORT_DRIVER_SRC}
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                   )
@@ -39,12 +41,10 @@ add_custom_command(OUTPUT ${SUPPORT_DRIVER_MODULE}
 
 # build module
 add_custom_command(OUTPUT ${DRIVER_MODULE}
-                   COMMAND cp ${CMAKE_SOURCE_DIR}/driver/x86_adapt_driver.c `pwd`
-                   COMMAND echo "obj-m += x86_adapt_driver.o" > Kbuild
-                   COMMAND echo "MY_CFLAGS += -g -DDEBUG"  >> Kbuild
-                   COMMAND echo "ccflags-y += ${MY_CFLAGS}"  >> Kbuild
-                   COMMAND echo "CC += ${MY_CFLAGS}" >> Kbuild
-                   COMMAND make W=1 -C  /lib/modules/`uname -r`/build M=`pwd`
+                   COMMAND cp ${CMAKE_SOURCE_DIR}/driver/x86_adapt_driver.c ${CMAKE_BINARY_DIR}/kernel_module/driver
+                   COMMAND echo "obj-m += x86_adapt_driver.o" > kernel_module/driver/Kbuild
+                   COMMAND echo "obj-y += driver/ definition_driver/" > kernel_module/Kbuild
+                   COMMAND make W=1 -C  /lib/modules/`uname -r`/build M=`pwd`/kernel_module
                    DEPENDS ${SUPPORT_DRIVER_MODULE}
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                   )
@@ -78,5 +78,7 @@ install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION lib)
 install(TARGETS x86a_read DESTINATION bin)
 install(TARGETS x86a_write DESTINATION bin)
-#install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR} modules_install)")
+install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR}/kernel_module modules_install)")
+install(CODE "execute_process(COMMAND depmod)")
+
 
