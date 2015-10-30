@@ -27,13 +27,11 @@ EXPORT_SYMBOL(get_all_knobs_length);
 static int __init x86_adapt_definition_init(void)
 {
   int err=0;
-  printk("Init\n");
   return err;
 }
 
 static void __exit x86_adapt_definition_exit(void)
 {
-  printk("Exit\n");
 }
 
 module_init(x86_adapt_definition_init);
