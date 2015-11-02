@@ -17,6 +17,11 @@
 
 #include <asm/amd_nb.h>
 
+#include "../definition_driver/x86_adapt_defs.h"
+
+extern u32 get_all_knobs_length(void);
+extern struct knob_entry_definition * get_all_knobs(void);
+
 #define MODULE_NAME "x86_adapt"
 
 /* allocates dynamicly a char device region, intializes it and adds it */
@@ -191,63 +196,6 @@ static int x86_adapt_def_node_cdev_ok = 0;
 /* temporary */
 static struct class * x86_adapt_class;
 
-/* everything I could think of :P */
-enum{
-    MSR = 0,
-    NB_F0, /* Device 15, Function 0 */
-    NB_F1, /* Device 15, Function 1 */
-    NB_F2, /* Device 15, Function 2 */
-    NB_F3, /* Device 15, Function 3 */
-    NB_F4, /* Device 15, Function 4 */
-    NB_F5, /* Device 15, Function 5 */
-    SB_PCU0, /* Device 10, Function 0 */
-    SB_PCU1, /* Device 10, Function 1 */
-    SB_PCU2, /* Device 10, Function 2 */
-    HSW_PCU0, /* Device 30, Function 0 */
-    HSW_PCU1, /* Device 30, Function 1 */
-    HSW_PCU2, /* Device 30, Function 2 */
-    UNCORE,
-};
-
-/* 4 byte id + 1 byte length + 4 byte name length + 4 byte description length */
-#define ENTRY_HEADER_SIZE 13 
-
-struct knob_entry {
-    /* user */
-    char * name;
-    char * description;
-    u32 id;
-    u8 length;
-    /* internal */
-    u8 device;
-    u8 readonly;
-    u64 register_index;
-    u64 bitmask;
-    u32 restricted_settings_length;
-    u32 reserved_settings_length;
-    u64 * restricted_settings;
-    u64 * reserved_settings;
-};
-
-struct fam_struct {
-    u16 family;
-    u8 model_length;
-    u16 * models; 
-};
-
-struct knob_vendor {
-    u8 vendor;
-    u8 features_length;
-    u64 * features;
-    u8 fam_length;
-    struct fam_struct * fams;
-};
-
-struct knob_entry_definition {
-    struct knob_entry knob;
-    u16 av_length;
-    struct knob_vendor ** av_vendors;
-};
 
 /* TODO: refactor, so that the AMD devices dont use memory on Intel and vice versa */
 
@@ -272,7 +220,6 @@ struct pci_dev ** hsw_pcu2 = NULL;
 
 /* here should be all the information inserted by python */
 
-#template_holder
 
 /* here should be all the information inserted by python */
 
@@ -346,6 +293,7 @@ static struct knob_entry * active_knobs_cpu = NULL;
 
 static void increment_knob_counter(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node) 
 {
+    struct knob_entry_definition * all_knobs = get_all_knobs();
     if (all_knobs[i].knob.device == MSR) 
         (*nr_knobs_cpu)++; 
     else 
@@ -355,6 +303,7 @@ static void increment_knob_counter(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node)
 
 static void add_knob(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node) 
 {
+    struct knob_entry_definition * all_knobs = get_all_knobs();
     if (all_knobs[i].knob.device == MSR) { 
         memcpy(&active_knobs_cpu[*nr_knobs_cpu],&(all_knobs[i].knob),
             sizeof (struct knob_entry)); 
@@ -378,6 +327,8 @@ static void traverse_knobs(u32 *nr_knobs_cpu, u32 *nr_knobs_node,
     u8 vendor = info.x86_vendor;
     u8 family = info.x86;
     u8 model = info.x86_model;
+    struct knob_entry_definition * all_knobs = get_all_knobs();
+    u32 all_knobs_length = get_all_knobs_length();
 
     /* for all knobs do something */
     for (i = 0;i<all_knobs_length;i++) {

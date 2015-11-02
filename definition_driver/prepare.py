@@ -9,8 +9,8 @@ import cpu,os,re,knob
 
 processor_group_folder="./processors/"
 knob_folder="./knobs/"
-template="x86_adapt_driver_template.c"
-target="x86_adapt_driver.c"
+template="x86_adapt_defs_template.c"
+target="x86_adapt_defs.c"
 
 if len(sys.argv) == 2:
     path=str(sys.argv[1])
