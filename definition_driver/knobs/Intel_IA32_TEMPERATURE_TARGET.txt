@@ -1,0 +1,14 @@
+//#name
+MSR_IA32_TEMPERATURE_TARGET
+//#description
+Temperature target for some Intel processors (TJ_max). Undocumented feature. See lxr.free-electrons.com/source/drivers/hwmon/coretemp.c#L354
+//#device
+MSR
+//#register_index
+0x1a2
+//#bit_mask
+(0x00FF0000)
+//#restricted_settings
+readonly
+//#processor_groups
+intel_therm
