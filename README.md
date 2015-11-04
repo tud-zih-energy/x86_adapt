@@ -33,7 +33,7 @@ A Linux kernel module, that allows changing/toggling system parameters stored in
 ```
     $ sudo make install
 ```
-This will install the libraries, binaries and kernel modules to the standard system pathes (e.g. /usr/include and /lib/modules/(kernel version)).
+This will install the libraries, binaries and kernel modules to the standard system pathes (e.g. /usr/include and /lib/modules/(kernel version) ).
 
 Remarks:
 You can also build a debian package with generate-deb.sh.
