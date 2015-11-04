@@ -25,8 +25,15 @@ A Linux kernel module, that allows changing/toggling system parameters stored in
 2. load the kernel module
 
 ```
-    # insmod x86_adapt_driver.ko
+    # This module provides symbols used by the x86_adapt kernel module
+    $ insmod kernel_module/definition_driver/x86_adapt_defs.ko
+    $ insmod kernel_module/driver/x86_adapt_driver.ko
 ```
+3. (optional) install
+```
+    $ sudo make install
+```
+This will install the libraries, binaries and kernel modules to the standard system pathes (e.g. /usr/include and /lib/modules/(kernel version) ).
 
 Remarks:
 You can also build a debian package with generate-deb.sh.
