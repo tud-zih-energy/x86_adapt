@@ -1,0 +1,12 @@
+//#description
+Thermal Monitor Reference Temperature(REF_TEMP): This field indicates the maximum junction temperature, also referred to as the throttle temperature, TCC activation temperature or prochot temperature. This is the temperature at which the Thermal Monitor is activated.
+//#device
+HSW_PCU0
+//#register_index
+0xe4
+//#bit_mask
+(0xFF0000)
+//#restricted_settings
+readonly
+//#processor_groups
+haswell_ep
