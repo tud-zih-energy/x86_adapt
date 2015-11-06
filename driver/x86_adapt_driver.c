@@ -607,10 +607,20 @@ static ssize_t do_write(struct file * file, const char * buf,
           * If file position is non-zero, then assume the string has
           * been read and indicate there is no more data to be read.
           */
+
+    char kernel_buffer[8];
+
     struct dentry * de = ((file->f_path).dentry);
     /* get device nr */
     int dev_nr = 0;
     char* end;
+
+    /* initial checks whether the arguments are valid */
+    if (count != 8)
+        return -ENXIO;
+    if (copy_from_user(kernel_buffer,buf,8)!=0)
+        return -ENXIO;
+
     dev_nr = simple_strtol(de->d_name.name,&end,10);
     if (*end) {
         /* special handling, change all settings */
@@ -659,23 +669,12 @@ static ssize_t do_write(struct file * file, const char * buf,
 static ssize_t cpu_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos)
 {
-    char kernel_buffer[8];
-    if (count != 8)
-        return -ENXIO;
-    if (copy_from_user(kernel_buffer,buf,8)!=0)
-        return -ENXIO;
-
-    return do_write(file,kernel_buffer,count,ppos,X86_ADAPT_CPU,active_knobs_cpu,active_knobs_cpu_length);
+    return do_write(file,buf,count,ppos,X86_ADAPT_CPU,active_knobs_cpu,active_knobs_cpu_length);
 }
 
 static ssize_t node_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos)
 {
-    char kernel_buffer[8];
-    if (count != 8)
-        return -ENXIO;
-    if (copy_from_user(kernel_buffer,buf,8)!=0)
-        return -ENXIO;
 
     return do_write(file,buf,count,ppos,X86_ADAPT_NODE,active_knobs_node,active_knobs_node_length);
 }
@@ -838,59 +837,19 @@ static ssize_t def_cpu_read(struct file * file, char * buf, size_t count, loff_t
     return get_entry_defs(buf,count,ppos,active_knobs_cpu,active_knobs_cpu_length);
 }
 
-/* Called on every open of the cdev (not for every device file!)
- * The are the rules:
- * 1) Multiple readers are ok
- * 2) If someone wants to read, there should be not writers!
- * 3) If someone wants to write, there should be no writers or readers!
- */
-static int x86_adapt_open(struct inode * inode, struct file * filep)
-{
-    int ret = 0;
-    struct x86_adapt_cdev *xdev = container_of(inode->i_cdev, struct x86_adapt_cdev, cdev);
-    
-    if ((filep->f_flags & O_ACCMODE) == O_RDONLY)
-    {
-        if (!down_read_trylock(&(xdev->rwsem)))
-        {
-            ret = -EBUSY;
-        }
-    } 
-    else if (!down_write_trylock(&(xdev->rwsem)))
-    {
-        ret = -EBUSY;
-    }
-    return ret;
-}
-
-static int x86_adapt_release(struct inode *inode, struct file *filp)
-{
-    struct x86_adapt_cdev *xdev = container_of(inode->i_cdev, struct x86_adapt_cdev, cdev);
-    if ((filp->f_flags & O_ACCMODE) == O_RDONLY)
-    {
-        up_read(&(xdev->rwsem));
-    } else {
-        up_write(&(xdev->rwsem));
-    }
-    return 0;
-}
 
 static const struct file_operations x86_adapt_cpu_fops = {
     .owner                = THIS_MODULE,
     .llseek               = x86_adapt_seek,
-    .open                 = x86_adapt_open,
     .read                 = cpu_read,
     .write                = cpu_write,
-    .release              = x86_adapt_release,
 };
 
 static const struct file_operations x86_adapt_node_fops = {
     .owner                = THIS_MODULE,
     .llseek               = x86_adapt_seek,
-    .open                 = x86_adapt_open,
     .read                 = node_read,
     .write                = node_write,
-    .release              = x86_adapt_release,
 };
 
 static const struct file_operations x86_adapt_def_cpu_fops = {
