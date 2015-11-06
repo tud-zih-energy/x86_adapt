@@ -34,10 +34,9 @@
  * Two example tools are available as @ref x86a_read.c "x86a_read" and @ref x86a_write.c "x86a_write" that allow direct read and write access from the command line and serve as an example on how to use the library.
  * 
  * @subsubsection parallelAccess Parallel access
- * The kernel module has been designed with parallel access in mind. 
- * Parallel read access is possible without any restrictions. 
- * Write access to any of the MSRs will be serialized by the kernel module through kernel locks and requires no active readers to be present. 
- * The multiple reader / single writer paradigm is implemented at the file layer so users have to pass O_RDONLY when opening the files or use the *_ro (@ref x86_adapt_get_device_ro and @ref x86_adapt_get_all_devices_ro) library functions. 
+ * Be aware that there is no locking in the kernel module.
+ * This means that someone else can change settings while you are reading or chaning them.
+ * This will not crash your system as there are no shared variables between the two accessing processes or threads, but only one writer can write his setting to the register.
  */
 
 /**
@@ -265,8 +264,8 @@ int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type);
  * x86_adapt_put_device().
  * If the device has previously opened using x86_adapt_get_device, the file
  * descriptor will not be updated internally and also provide write access.
- * A device may be opened from several programs in parallel using this function
- * x86_adapt_get_device_ro() or from one program using x86_adapt_get_device()
+ * A device may be opened from several programs in parallel using
+ * x86_adapt_get_device_ro() or x86_adapt_get_device()
  * @code
  * if (x86_adapt_init())
  * {
@@ -304,7 +303,7 @@ int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr);
  * If the device has previously opened using x86_adapt_get_device_ro, the file
  * descriptor will not be updated only provide read-only access.
  * A device may be opened from several programs in parallel using
- * x86_adapt_get_device_ro() or from one program using x86_adapt_get_device()
+ * x86_adapt_get_device_ro() or x86_adapt_get_device()
  * @code
  * if (x86_adapt_init())
  * {
@@ -357,8 +356,7 @@ int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr);
  * If the device has previously opened using x86_adapt_get_all_devices(), the
  * file descriptor will not be updated internally and also provide write access.
  * A device may be opened from several programs in parallel using
- * x86_adapt_get_all_devices_ro() or from one program using
- * x86_adapt_get_all_devices()
+ * x86_adapt_get_all_devices_ro() or x86_adapt_get_all_devices()
  * @param device_type can be X86_ADAPT_CPU or X86_ADAPT_DIE
  * @return a file descriptor to use later or ErrorCode<br>
  * ErrorCode is:<br>
@@ -383,8 +381,7 @@ int x86_adapt_get_all_devices_ro(x86_adapt_device_type device_type);
  * If the device has previously opened using x86_adapt_get_all_devices(), the
  * file descriptor will not be updated internally and also provide write access.
  * A device may be opened from several programs in parallel using
- * x86_adapt_get_all_devices_ro()
- * or from one program using x86_adapt_get_all_devices()
+ * x86_adapt_get_all_devices_ro() or x86_adapt_get_all_devices()
  * The all_devices file descriptor is of limited use for reading as it returns
  * the bitwise or'ed values from all instances of CPUs or nodes. However, it can
  * be useful for writing.
