@@ -1,0 +1,12 @@
+//#description
+Package temperature in degrees (C).
+//#device
+SB_PCU0
+//#register_index
+0xc8
+//#bit_mask
+(0xF)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge,ivybridge,haswell_he
