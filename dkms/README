@@ -1,0 +1,26 @@
+Convert x86_adapt kernel modules to dkms folders
+
+Howto:
+
+1. Build kernel sources and DKMS packages
+
+$ # go to this folder
+$ cd dkms
+$ # create folders
+$ ./make_dkms.sh
+
+Now make sure, that the x86_adapt* folders are owned by root and that no one else has any access rights!
+
+2. install dkms folders
+
+$ # go to this folder
+$ cd dkms
+$ # install modules
+$ ./make_install.sh
+
+3. Uninstall from dkms
+
+$ # go to this folder
+$ cd dkms
+$ # install modules
+$ ./make_remove.sh
