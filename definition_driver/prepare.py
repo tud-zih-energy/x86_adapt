@@ -11,12 +11,23 @@ processor_group_folder="./processors/"
 knob_folder="./knobs/"
 template="x86_adapt_defs_template.c"
 target="x86_adapt_defs.c"
+target_path="./"
 
-if len(sys.argv) == 2:
+if len(sys.argv) >= 2:
     path=str(sys.argv[1])
     if path[-1] != "/":
         path=path+"/"
     target=path+target
+    target_path=path
+
+if len(sys.argv) == 3:
+    path=str(sys.argv[2])
+    if path[-1] != "/":
+        path=path+"/"
+    source=path
+    processor_group_folder=source+processor_group_folder
+    knob_folder=source+knob_folder
+    template=source+template
 
 def bitCount(int_type):
     count = 0
@@ -117,6 +128,8 @@ for knob in knobs:
 text = text + "static u32 all_knobs_length="+str(len(knobs))+";\n"
 text = text + "static struct knob_entry_definition all_knobs [] = {\n"
 
+nda=False
+
 for knob in knobs:
     text = text + "\t{\n"
     text = text + "\t.knob.name=\""+knob.name+"\",\n"
@@ -158,16 +171,35 @@ for knob in knobs:
         text = text + "\t.av_vendors=processorgroups_"+knob.name+"}\n,"
     else:
         text = text + "\t.av_vendors="+knob.processor_groups[0]+"_ref}\n,"
+    
+    if knob.nda:
+        nda = True
 text = text[0:-1]
 text = text + "};\n"
 
 # now open template
 # and replace "#template_holder" with text
 
+if nda:
+    nda_file=open(target_path+"IMPORTANT_README.txt","w")
+    nda_file.write(
+"This kernel module contains NDA information.\n"
+"Do not distribute it, do not copy it, do not make it available to anyone!\n"
+)
+    nda_file.close()
 templatefile=open(template)
 targetfile=open(target,"w")
+if nda:
+    targetfile.write(
+"/*****************************************************************************/\n"
+"/* This kernel module contains NDA information.                              */\n"
+"/* Do not distribute it, do not copy it, do not make it available to anyone! */\n"
+"/*****************************************************************************/\n"
+)
 for line in templatefile:
     if line.strip()=="#template_holder":
         targetfile.write(text)
     else:
         targetfile.write(line)
+templatefile.close()
+targetfile.close()
