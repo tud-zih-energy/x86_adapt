@@ -24,3 +24,5 @@ $ # go to this folder
 $ cd dkms
 $ # install modules
 $ ./make_remove.sh
+
+Note: you might want to edit the version of the dkms packages in the scripts
