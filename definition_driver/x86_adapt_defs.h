@@ -57,6 +57,6 @@ struct knob_entry_definition {
     struct knob_vendor ** av_vendors;
 };
 
-struct knob_entry_definition * get_all_knobs(void);
+struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 
-u32 get_all_knobs_length(void);
+u32 x86_adapt_get_all_knobs_length(void);

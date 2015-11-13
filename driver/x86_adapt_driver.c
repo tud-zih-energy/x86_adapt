@@ -19,8 +19,8 @@
 
 #include "../definition_driver/x86_adapt_defs.h"
 
-extern u32 get_all_knobs_length(void);
-extern struct knob_entry_definition * get_all_knobs(void);
+extern u32 x86_adapt_get_all_knobs_length(void);
+extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 
 #define MODULE_NAME "x86_adapt"
 
@@ -293,7 +293,7 @@ static struct knob_entry * active_knobs_cpu = NULL;
 
 static void increment_knob_counter(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node) 
 {
-    struct knob_entry_definition * all_knobs = get_all_knobs();
+    struct knob_entry_definition * all_knobs = x86_adapt_get_all_knobs();
     if (all_knobs[i].knob.device == MSR) 
         (*nr_knobs_cpu)++; 
     else 
@@ -303,7 +303,7 @@ static void increment_knob_counter(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node)
 
 static void add_knob(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node) 
 {
-    struct knob_entry_definition * all_knobs = get_all_knobs();
+    struct knob_entry_definition * all_knobs = x86_adapt_get_all_knobs();
     if (all_knobs[i].knob.device == MSR) { 
         memcpy(&active_knobs_cpu[*nr_knobs_cpu],&(all_knobs[i].knob),
             sizeof (struct knob_entry)); 
@@ -327,8 +327,8 @@ static void traverse_knobs(u32 *nr_knobs_cpu, u32 *nr_knobs_node,
     u8 vendor = info.x86_vendor;
     u8 family = info.x86;
     u8 model = info.x86_model;
-    struct knob_entry_definition * all_knobs = get_all_knobs();
-    u32 all_knobs_length = get_all_knobs_length();
+    struct knob_entry_definition * all_knobs = x86_adapt_get_all_knobs();
+    u32 all_knobs_length = x86_adapt_get_all_knobs_length();
 
     /* for all knobs do something */
     for (i = 0;i<all_knobs_length;i++) {

@@ -11,18 +11,18 @@
 
 /* here should be all the information inserted by python */
 
-struct knob_entry_definition * get_all_knobs(void)
+struct knob_entry_definition * x86_adapt_get_all_knobs(void)
 {
   return all_knobs;
 }
 
-u32 get_all_knobs_length(void)
+u32 x86_adapt_get_all_knobs_length(void)
 {
   return all_knobs_length;
 }
 
-EXPORT_SYMBOL(get_all_knobs);
-EXPORT_SYMBOL(get_all_knobs_length);
+EXPORT_SYMBOL(x86_adapt_get_all_knobs);
+EXPORT_SYMBOL(x86_adapt_get_all_knobs_length);
 
 static int __init x86_adapt_definition_init(void)
 {
