@@ -10,4 +10,5 @@ MSR
 intel
 //#CPUID
 0x0a,(eax&0xFF) > 0
-//#readonly
+//#restricted_settings
+readonly
