@@ -217,12 +217,28 @@ struct pci_dev ** hsw_pcu0 = NULL;
 struct pci_dev ** hsw_pcu1 = NULL;
 struct pci_dev ** hsw_pcu2 = NULL;
 
+/* artificial knob for resetting */
+static struct knob_entry reset_knob =
+{
+    .name="RESET",
+    .description="Writing ANY 8 bytes to this item will reset all settings for the accessed device (cpu/node)",
+    .id=0,
+    .length=1,
+    .bitmask=1
+};
+#define KNOB_RESET 0
 
-/* here should be all the information inserted by python */
+static u32 active_knobs_node_length = 0;
+static struct knob_entry * active_knobs_node = NULL;
 
+static u64 ** defaults_node = NULL;
 
-/* here should be all the information inserted by python */
+static u32 active_knobs_cpu_length = 0;
+static struct knob_entry * active_knobs_cpu = NULL;
 
+static u64 ** defaults_cpu = NULL;
+
+static u64 read_setting(int dev_nr, struct knob_entry knob) ;
 
 /* This function gives you the bus id for uncore components of a NUMA node in sandy bridge ep processors */
 static int get_uncore_bus_id(int node_id)
@@ -236,14 +252,17 @@ static int get_uncore_bus_id(int node_id)
 
     /* based on arch/x86/kernel/cpu/perf_event_intel_uncore.c for Sandy Bridge / IvyTown */
     /* based on Datasheet 2 for Haswell EP */
+    /* based on arch/x86/kernel/cpu/perf_event_intel_uncore_snbep.c for Broadwell EP */
     /* Sandy Bridge   : 0x3ce0 */
     /* Ivy Town:        0x0e1e*/
     /* Haswell EP:        0x2f1e*/
+    /* Broadwell EP:        0x6f1e*/
     switch (boot_cpu_data.x86_model) {
       /* Sandy Bridge EP: 0x3ce0 */
       case 45: devid = 0x3ce0; break;
       case 62: devid = 0x0e1e; break;
-      case 0x3f: devid = 0x2f1e; break;
+      case 63: devid = 0x2f1e; break;
+      case 86: devid = 0x6f1e; break;
       default:
         // printk(KERN_ERR "Unsupported Intel processor for Uncore stuff.\n");
         return -1;
@@ -284,12 +303,6 @@ static int get_uncore_bus_id(int node_id)
   return -1;
 
 }
-
-static u32 active_knobs_node_length = 0;
-static struct knob_entry * active_knobs_node = NULL;
-
-static u32 active_knobs_cpu_length = 0;
-static struct knob_entry * active_knobs_cpu = NULL;
 
 static void increment_knob_counter(u32 i, u32 *nr_knobs_cpu, u32 *nr_knobs_node) 
 {
@@ -363,56 +376,151 @@ static void traverse_knobs(u32 *nr_knobs_cpu, u32 *nr_knobs_node,
     }
     return;
 }
+static inline void free_defaults(void)
+{
+    int index;
+    if (active_knobs_cpu != NULL)
+        kfree(active_knobs_cpu);
+    active_knobs_cpu = NULL;
+    if (active_knobs_node != NULL)
+        kfree(active_knobs_node);
+    active_knobs_node = NULL;
+    if (defaults_node != NULL)
+    {
+        for (index=0;index<num_possible_nodes();index++)
+        {
+            if (defaults_node[index]!=NULL)
+                kfree(defaults_node[index]);
+        }
+        kfree(defaults_node);
+        defaults_node = NULL;
+    }
+    if (defaults_cpu != NULL)
+    {
+        for (index=0;index<num_possible_cpus();index++)
+        {
+            if (defaults_cpu[index]!=NULL)
+                kfree(defaults_cpu[index]);
+        }
+        kfree(defaults_cpu);
+        defaults_cpu = NULL;
+    }
+}
+
+static inline void read_defaults(void)
+{
+    u32 node, cpu, knob;
+    /* read defaults */
+    for (node=0;node<num_possible_nodes();node++)
+    {
+        for (knob=1;knob<active_knobs_node_length;knob++)
+        {
+             defaults_node[node][knob-1]=read_setting(node,active_knobs_node[knob]);
+        }
+    }
+    
+    for (cpu=0;cpu<num_possible_cpus();cpu++)
+    {
+        for (knob=1;knob<active_knobs_cpu_length;knob++)
+        {
+             defaults_cpu[cpu][knob-1]=read_setting(cpu,active_knobs_cpu[knob]);
+        }
+    }
+}
 
 /* used at init */
 static int buildup_entries(void) 
 {
-    u32 nr_knobs_cpu = 0,nr_knobs_node = 0;
+    u32 nr_knobs_cpu = 0,nr_knobs_node = 0, index;
 
     /* count number of knobs */
     traverse_knobs(&nr_knobs_cpu, &nr_knobs_node, increment_knob_counter);
-    // printk("Found %d cpu features\n", nr_knobs_cpu);
-    // printk("Found %d node features\n", nr_knobs_node);
+
+                    // printk("Found %d cpu features\n", nr_knobs_cpu);
+                    // printk("Found %d node features\n", nr_knobs_node);
 
     /* allocate memory for the avaible knobs */
-    active_knobs_cpu = kmalloc(nr_knobs_cpu*sizeof(struct knob_entry),GFP_KERNEL);
+
+
+    active_knobs_cpu = kmalloc((nr_knobs_cpu+1)*sizeof(struct knob_entry),GFP_KERNEL);
     if (unlikely(active_knobs_cpu == NULL))
         return -ENOMEM;
-    active_knobs_cpu_length = nr_knobs_cpu;
-    active_knobs_node = kmalloc(nr_knobs_node*sizeof(struct knob_entry),GFP_KERNEL);
+    active_knobs_cpu_length = nr_knobs_cpu+1;
+
+    active_knobs_node = kmalloc((nr_knobs_node+1)*sizeof(struct knob_entry),GFP_KERNEL);
     if (unlikely(active_knobs_node == NULL))
-        return -ENOMEM;
-    active_knobs_node_length = nr_knobs_node;
+        goto fail;
+    active_knobs_node_length = nr_knobs_node+1;
+
+    /* allocate memory for defaults (node) */
+
+
+    defaults_node = kzalloc(num_possible_nodes()*sizeof(u64*),GFP_KERNEL);
+    if (unlikely(defaults_node == NULL))
+        goto fail;
+    for (index=0;index<num_possible_nodes();index++)
+    {
+        defaults_node[index] = kmalloc(nr_knobs_node*sizeof(u64),GFP_KERNEL);
+        if (unlikely(defaults_node[index] == NULL))
+             goto fail;
+    }
+
+    /* allocate memory for defaults (CPU) */
+
+
+    defaults_cpu = kzalloc(num_possible_cpus()*sizeof(u64*),GFP_KERNEL);
+    if (unlikely(defaults_cpu == NULL))
+        goto fail;
+    for (index=0;index<num_possible_cpus();index++)
+    {
+        defaults_cpu[index] = kmalloc(nr_knobs_cpu*sizeof(u64),GFP_KERNEL);
+        if (unlikely(defaults_cpu[index] == NULL))
+             goto fail;
+    }
+
+
+
+    /* add reset knobs */
+    memcpy(&active_knobs_cpu[0],&reset_knob,sizeof(struct knob_entry));
+    memcpy(&active_knobs_node[0],&reset_knob,sizeof(struct knob_entry));
+
 
     /* add knobs */
-    nr_knobs_cpu = 0;
-    nr_knobs_node = 0;
+    nr_knobs_cpu = 1; /* already a reset knob, so there's already 1 */
+    nr_knobs_node = 1;
+
     traverse_knobs(&nr_knobs_cpu, &nr_knobs_node, add_knob);
 
     return 0;
+
+fail:
+    free_defaults();
+    return -ENOMEM;
+
 }
+
 
 /* overrides the default kernel llseek function to prevent a not working pread/pwrite on certain kernel versions */
 static loff_t x86_adapt_seek(struct file *file, loff_t offset, int orig)
 {
-	loff_t ret;
-	struct inode *inode = file->f_mapping->host;
+    loff_t ret;
+    struct inode *inode = file->f_mapping->host;
 
-	mutex_lock(&inode->i_mutex);
-	switch (orig) {
-	case 0:
-		file->f_pos = offset;
-		ret = file->f_pos;
-		break;
-	case 1:
-		file->f_pos += offset;
-		ret = file->f_pos;
-		break;
-	default:
-		ret = -EINVAL;
-	}
-	mutex_unlock(&inode->i_mutex);
-	return ret;
+    mutex_lock(&inode->i_mutex);
+    switch (orig) {
+    case 0:
+        file->f_pos = offset;
+        ret = file->f_pos;
+        break;
+    case 1:
+        file->f_pos += offset;
+        ret = file->f_pos;
+        break;
+    default:
+        ret = -EINVAL;
+    }
+    mutex_unlock(&inode->i_mutex);
+    return ret;
 }
 
 
@@ -453,31 +561,31 @@ static u64 read_setting(int dev_nr, struct knob_entry knob)
                 break;
             case NB_F0:
                 nb = nb_f0[dev_nr];
-		            break;
+                break;
             case NB_F1:
                 nb = nb_f1[dev_nr];
-		            break;
+                break;
             case NB_F2:
                 nb = nb_f2[dev_nr];
-		            break;
+                break;
             case NB_F3:
                 nb = nb_f3[dev_nr];
-		            break;
+                break;
             case NB_F4:
                 nb = nb_f4[dev_nr];
-		            break;
+                break;
             case NB_F5:
                 nb = nb_f5[dev_nr];
-		            break;
+                break;
             case SB_PCU0:
                 nb = sb_pcu0[dev_nr];
-		            break;
+                break;
             case SB_PCU1:
                 nb = sb_pcu1[dev_nr];
-		            break;
+                break;
             case SB_PCU2:
                 nb = sb_pcu2[dev_nr];
-		            break;
+                break;
             case HSW_PCU0:
                 nb = hsw_pcu0[dev_nr];
                 break;
@@ -493,7 +601,7 @@ static u64 read_setting(int dev_nr, struct knob_entry knob)
         if (nb) {
             pci_read_config_dword(nb,knob.register_index,&l);
             register_reading = l;
-	}
+    }
     } else {
         printk(KERN_ERR "Failed to read setting of knob %s. Can not find device %d.\n", knob.name ,dev_nr);
     }
@@ -599,10 +707,26 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
     }
 }
 
+static int reset_setting(int type, int dev_nr, struct knob_entry knob, u64 default_setting)
+{
+    if (knob.readonly)
+        return 0;
+    switch(type)
+    {
+        case X86_ADAPT_CPU:
+                        return write_setting(dev_nr,knob,default_setting);
+        case X86_ADAPT_NODE:
+                        return write_setting(dev_nr,knob,default_setting);
+        default:
+            printk("Error, resetting unknown knob");
+            return 1;
+    }
+} 
+
 /* resolves the device from file and writes the buffer to the knob, that corresponds to ppos */
 static ssize_t do_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos, int type,
-        struct knob_entry * entries, u32 entries_length)
+        struct knob_entry * entries, u32 entries_length, u64 ** defaults)
 {        /*
           * If file position is non-zero, then assume the string has
           * been read and indicate there is no more data to be read.
@@ -633,33 +757,88 @@ static ssize_t do_write(struct file * file, const char * buf,
 
     if ((*ppos < entries_length)) {
         u64 setting = 0;
-        if (count != 8)
-            return -EINVAL;
         if (entries[*ppos].readonly)
             return -EPERM;
-        setting = ((uint64_t*)buf)[0];
+        setting = ((uint64_t*)kernel_buffer)[0];
         if (dev_nr == -1) {
-            /* write to all devices */
-            if (type == X86_ADAPT_CPU) {
-            	int i;
-                for_each_online_cpu(i) {
-                    int ret = write_setting(i,entries[*ppos],setting);
-                    if(ret)
-                        return ret;
-                }
-            } else {
-            	int i;
-                for_each_online_node(i) {
-                    int ret = write_setting(i,entries[*ppos],setting);
-                    if(ret)
-                        return ret;
-                }
+            /* if reset */
+            if ( *ppos == KNOB_RESET )
+            {
+                 /* reset to default */
+                 int ret = 0;
+                 int i;
+                 int cpu_or_node;
+                 switch (type)
+                 {
+                     case X86_ADAPT_CPU:
+                         for_each_online_cpu(cpu_or_node) {
+                             for ( i = 1 ; i < entries_length ; i++ )
+                             {
+                                 ret = reset_setting(X86_ADAPT_CPU,cpu_or_node,entries[i],defaults[cpu_or_node][i-1]);
+                                 /* if error, return error */
+                                 if (ret) return ret;
+                             }
+                         }
+                         break;
+                     case X86_ADAPT_NODE:
+                          for_each_online_node(cpu_or_node) {
+                              for ( i = 1 ; i < entries_length ; i++ )
+                              {
+                                  ret = reset_setting(X86_ADAPT_NODE,cpu_or_node,entries[i],defaults[cpu_or_node][i-1]);
+                                  /* if error, return error */
+                                  if (ret) return ret;
+                              }
+                          }
+                          break;
+                      default:
+                          printk("Invalid reset");
+                 }
+                 return count;
+            }
+            else
+            {
+                /* not reset, but write */
+                /* write to all devices */
+                if (type == X86_ADAPT_CPU) {
+                    int i;
+                    for_each_online_cpu(i) {
+                        int ret = write_setting(i,entries[*ppos],setting);
+                        if(ret)
+                            return ret;
+                    }
+                } else {
+                    int i;
+                    for_each_online_node(i) {
+                        int ret = write_setting(i,entries[*ppos],setting);
+                        if(ret)
+                            return ret;
+                    }
+               }
             }
             return count;
         } else {
-            int ret = write_setting(dev_nr,entries[*ppos],setting);
-            if (ret) return ret;
-            return count;
+            int ret=0;
+            /* if reset */
+            if ( *ppos == KNOB_RESET )
+            {
+                 /* only if s.o. writes 0 */
+                 /* reset to default */
+                 int i;
+                 for ( i = 1 ; i < entries_length ; i++ )
+                 {
+                     ret = reset_setting(type, dev_nr, entries[i], defaults[dev_nr][i-1]);
+                     /* if error, return error */
+                     if (ret) return ret;
+                 }
+                 return count;
+            }
+            else
+            {
+                /* not reset, but write */
+                ret = write_setting(dev_nr,entries[*ppos],setting);
+                if (ret) return ret;
+                return count;
+            }
         }
     } else {
         return -ENXIO;
@@ -669,14 +848,13 @@ static ssize_t do_write(struct file * file, const char * buf,
 static ssize_t cpu_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos)
 {
-    return do_write(file,buf,count,ppos,X86_ADAPT_CPU,active_knobs_cpu,active_knobs_cpu_length);
+    return do_write(file,buf,count,ppos,X86_ADAPT_CPU,active_knobs_cpu,active_knobs_cpu_length,defaults_cpu);
 }
 
 static ssize_t node_write(struct file * file, const char * buf, 
         size_t count, loff_t *ppos)
 {
-
-    return do_write(file,buf,count,ppos,X86_ADAPT_NODE,active_knobs_node,active_knobs_node_length);
+    return do_write(file,buf,count,ppos,X86_ADAPT_NODE,active_knobs_node,active_knobs_node_length,defaults_node);
 }
 
 /* resolves device from file and reads the knob, that corresponds to ppos into the buffer */
@@ -693,8 +871,19 @@ static ssize_t do_read(struct file * file, char * buf,
     /* get device nr */
     int dev_nr = 0;
     char* end;
+    u64 setting = 0;
+
+    /* can not read reset */
+    if ( *ppos == KNOB_RESET )
+    {
+        if (copy_to_user(buf, &setting, 8)) {
+            return -EFAULT;
+        }
+        return 8;
+    }
+
     dev_nr = simple_strtol(de->d_name.name,&end,10);
-	if (*end) {
+    if (*end) {
         if (strcmp(de->d_name.name,"all"))
             /* special handling, change all settings */
             return -ENXIO;
@@ -706,7 +895,7 @@ static ssize_t do_read(struct file * file, char * buf,
     if (*ppos<entries_length) {
 
         /* setting read from nb / msr */
-        u64 setting = 0,tmp = 0;
+        u64 tmp = 0;
 
         /* not enough buffer */
         if (count != 8) {
@@ -718,13 +907,13 @@ static ssize_t do_read(struct file * file, char * buf,
         if (dev_nr == -1) {
             /* read all devices */
             if (type == X86_ADAPT_CPU) {
-            	int i;
+                int i;
                 for_each_online_cpu(i) {
                     tmp = read_setting(i,entries[*ppos]);
                     setting |= tmp;
                 }
             } else {
-            	int i;
+                int i;
                 for_each_online_node(i) {
                     tmp = read_setting(i,entries[*ppos]);
                     setting |= tmp;
@@ -865,12 +1054,12 @@ static const struct file_operations x86_adapt_def_node_fops = {
 
 static int x86_adapt_device_create(int cpu)
 {
-	struct device *dev;
+    struct device *dev;
 
     dev = device_create(x86_adapt_class,NULL,MKDEV(MAJOR(x86_adapt_cpu_device), 
                 MINOR(x86_adapt_cpu_device)+cpu),NULL,"cpu%d",cpu);
 
-	return IS_ERR(dev) ? PTR_ERR(dev) : 0;
+    return IS_ERR(dev) ? PTR_ERR(dev) : 0;
 }
 
 /* function to manage cpu hotplug events */
@@ -976,6 +1165,8 @@ static int __init x86_adapt_init(void)
     ALLOC_UNCORE_PCI(hsw_pcu1,30,1);
     ALLOC_UNCORE_PCI(hsw_pcu2,30,2);
 
+    read_defaults();
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
     __register_hotcpu_notifier(&x86_adapt_cpu_notifier);
     put_online_cpus();
@@ -994,11 +1185,11 @@ fail:
     UNREGISTER_AND_DELETE(x86_adapt_def_node, DEF_DESTROY, node);
     if (active_knobs_cpu) {
         kfree(active_knobs_cpu);
-	active_knobs_cpu = NULL;
+        active_knobs_cpu = NULL;
     }
     if (active_knobs_node) {
         kfree(active_knobs_node);
-	active_knobs_node = NULL;
+        active_knobs_node = NULL;
     }
     FREE_NB(0);
     FREE_NB(1);
@@ -1012,6 +1203,7 @@ fail:
     FREE_PCI(hsw_pcu0);
     FREE_PCI(hsw_pcu1);
     FREE_PCI(hsw_pcu2);
+    free_defaults();
 
     put_online_cpus();
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
@@ -1033,11 +1225,11 @@ static void __exit x86_adapt_exit(void)
     UNREGISTER_AND_DELETE(x86_adapt_def_node, DEF_DESTROY, node);
     if (active_knobs_cpu) {
         kfree(active_knobs_cpu);
-	active_knobs_cpu = NULL;
+        active_knobs_cpu = NULL;
     }
     if (active_knobs_node) {
         kfree(active_knobs_node);
-	active_knobs_node = NULL;
+        active_knobs_node = NULL;
     }
     FREE_NB(0);
     FREE_NB(1);
@@ -1051,6 +1243,7 @@ static void __exit x86_adapt_exit(void)
     FREE_PCI(hsw_pcu0);
     FREE_PCI(hsw_pcu1);
     FREE_PCI(hsw_pcu2);
+    free_defaults();
 
     class_destroy(x86_adapt_class);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
