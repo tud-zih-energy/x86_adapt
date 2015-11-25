@@ -63,11 +63,15 @@ value: available settings separated by comas, or "readonly"
 value: reserved settings separated by comas
 //#processor_groups
 value: one or more processor groups delimited by ','
+//#CPUID (optional)
+operation,check in C sytax : a cpuid check, where you provide an operation (e.g."0a") and a check (e.g, "(eax&0xF) == 2" ). The whole would look like "0a,(eax&0xF) == 2"
+//#read-only (optional) defines the knob as read-only
+//#NDA (optional) defines the knob as NDA
+//#name (optional)
+override_name: overrides the name defined by the text file. This variable can be used when the same knob has different register locations on different processors.
+
 ```
 
-The variable name (```//#name```) is optional and overrides the name defined by
-the text file. This variable can be used when the same knob has different register
-locations on different processors.
 
 The processor groups are defined as txt files in the directory processors.
 They use the same syntax. The following variables are used to describe a
