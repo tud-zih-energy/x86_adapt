@@ -1,0 +1,12 @@
+//#description
+General Performance Counter 7
+//#device
+MSR
+//#register_index
+0xC8
+//#bit_mask
+(0xFFFFFFFFFFFF)
+//#processor_groups
+intel
+//#CPUID
+0x0a,((eax>>8)&0xFF) > 7

@@ -1,0 +1,15 @@
+//#name
+Intel_PERF_GLOBAL_STATUS_CTRL
+//#description
+Global Performance Counter Control (R/W) If CPUID.0AH: EAX[7:0] > 0 Counter increments while the result of ANDing respective enable bit in this MSR with the corresponding OS or USR bits in the general-purpose or fixed counter control MSR is true. [0] Enable PMC0 [1] Enable PMC1 [2] Enable PMC2 [3] Enable PMC3 [4] Enable PMC4 [5] Enable PMC5 [6] Enable PMC6 [7] Enable PMC7 [32] Enable FixedCtr0 [33] Enable FixedCtr1 [34] Enable FixedCtr2
+//#device
+MSR
+//#register_index
+0x38f
+//#bit_mask
+(0x7000000FF)
+//#processor_groups
+intel
+//#CPUID
+0x0a,( ( (eax&0xFF) > 0 ) && ( ((eax>>8)&0xff) == 8 )  && ((edx&0xf) > 2))
+

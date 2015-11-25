@@ -1,0 +1,2 @@
+//#vendor
+X86_VENDOR_INTEL

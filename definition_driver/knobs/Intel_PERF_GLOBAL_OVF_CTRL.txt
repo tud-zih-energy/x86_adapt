@@ -1,0 +1,13 @@
+//#description
+Global Performance Counter Overflow Control (R/W) [0/1/2/3] Set 1 to Clear Ovf_PMC{0/1/2/3} bit. [32/33/34] Set 1 to Clear Ovf_FIXED_CTR{0/1/2} bit. [62] Set 1 to Clear OvfBuf bit. [63] Set to 1 to clear CondChgd bit.
+//#device
+MSR
+//#register_index
+0x390
+//#bit_mask
+(0xC00000070000000F)
+//#processor_groups
+intel
+//#CPUID
+0x0a,( ( (eax&0xFF) > 0 ) && ( (eax&0xFF) <= 3 ) && ( ((eax>>8)&0xff) == 4 )  && ((edx&0xf) > 2))
+

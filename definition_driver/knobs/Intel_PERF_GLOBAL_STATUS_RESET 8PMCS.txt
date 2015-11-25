@@ -1,0 +1,15 @@
+//#name
+Intel_PERF_GLOBAL_STATUS_RESET
+//#description
+Global Performance Counter Overflow Reset Control (R/W) [0/1/2/3/4/5/6/7] Set 1 to Clear Ovf_PMC{0/1/2/3/4/5/6/7} bit. [32/33/34] Set 1 to Clear Ovf_FIXED_CTR{0/1/2} bit. [58] Set 1 to Clear LBR_Frz bit.[59] Set 1 to Clear CTR_Frz bit.[60] Set 1 to Clear ASCI bit.[62] Set 1 to Clear OvfBuf bit. [63] Set to 1 to clear CondChgd bit.
+//#device
+MSR
+//#register_index
+0x390
+//#bit_mask
+(0xDC000007000000FF)
+//#processor_groups
+intel
+//#CPUID
+0x0a,( ( (eax&0xFF) > 3 ) && ( ((eax>>8)&0xff) > 7 )  && ((edx&0xf) > 2))
+

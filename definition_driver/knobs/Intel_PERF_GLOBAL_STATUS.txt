@@ -1,0 +1,13 @@
+//#description
+Global Performance Counter Status (RO). [0] Ovf_PMC0: Overflow status of IA32_PMC0. If CPUID.0AH: EAX[15:8] > 0, [1] Ovf_PMC1: Overflow status of IA32_PMC1. If CPUID.0AH: EAX[15:8] > 1 [2] Ovf_PMC2: Overflow status of IA32_PMC2. If CPUID.0AH: EAX[15:8] > 2 [3] Ovf_PMC3: Overflow status of IA32_PMC3. If CPUID.0AH: EAX[15:8] > 3 [31:4] Reserved. [32] Ovf_FixedCtr0: Overflow status of IA32_FIXED_CTR0. If CPUID.0AH: EAX[7:0] > 1 [33] Ovf_FixedCtr1: Overflow status of IA32_FIXED_CTR1. If CPUID.0AH: EAX[7:0] > 1 [34] Ovf_FixedCtr2: Overflow status of IA32_FIXED_CTR2. If CPUID.0AH: EAX[7:0] > 1 [54:35] Reserved. [55] Trace_ToPA_PMI: A PMI occurred due to a ToPA entry memory buffer was completely filled. [57:56] Reserved. If (CPUID.(EAX=07H, ECX=0):EBX[25] = 1) && IA32_RTIT_CTL.ToPA = 1 [58] LBR_Frz: LBRs are frozen due to If CPUID.0AH: EAX[7:0] > 3 • IA32_DEBUGCTL.FREEZE_LBR_ON_PMI=1, • The LBR stack overflowed [59] CTR_Frz: Performance counters in the core PMU are frozen due to If CPUID.0AH: EAX[7:0] > 3 • IA32_DEBUGCTL.FREEZE_PERFMON_ON_PMI=1, • one or more core PMU counters overflowed. [60] ASCI: Data in the performance counters in the core PMU may include contributions from the direct or indirect operation intel SGX to protect an enclave. If CPUID.(EAX=07H, ECX=0):EBX[2] = 1 [61] Ovf_Uncore: Uncore counter overflow status. If CPUID.0AH: EAX[7:0] > 2 [62] OvfBuf: DS SAVE area Buffer overflow status. If CPUID.0AH: EAX[7:0] > 0 [63] CondChgd : status bits of this register has If CPUID.0AH: EAX[7:0] > 0 changed.
+//#device
+MSR
+//#register_index
+0x38e
+//#bit_mask
+(0xFE4000070000000F)
+//#processor_groups
+intel
+//#CPUID
+0x0a,(eax&0xFF) > 0
+//#readonly

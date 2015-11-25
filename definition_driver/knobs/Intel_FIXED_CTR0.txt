@@ -1,0 +1,12 @@
+//#description
+Fixed-Function Performance Counter 0 (R/W): Counts Instr_Retired.Any.
+//#device
+MSR
+//#register_index
+0x309
+//#bit_mask
+(0xFFFFFFFFFFFF)
+//#processor_groups
+intel
+//#CPUID
+0x0a,(edx&0x1F) > 0

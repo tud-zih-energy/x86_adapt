@@ -1,0 +1,13 @@
+//#description
+Global Performance Counter Overflow Set Control (R/W) [0/1/2/3] Set 1 to cause Ovf_PMC{0/1/2/3}=1. [32/33/34] Set 1 to cause Ovf_FIXED_CTR{0/1/2}=1. [58] Set 1 to cause LBR_Frz=1.[59] Set 1 to cause CTR_Frz=1.[60] Set 1 to cause ASCI=1.[61] Set 1 to cause OvfUncore=1 [62] Set 1 to cause OvfBuf=1.
+//#device
+MSR
+//#register_index
+0x391
+//#bit_mask
+(0x7C0000070000000F)
+//#processor_groups
+intel
+//#CPUID
+0x0a,( ( (eax&0xFF) > 3 ) && ( ((eax>>8)&0xff) == 4 )  && ((edx&0xf) > 2))
+
