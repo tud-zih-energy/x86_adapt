@@ -55,6 +55,7 @@ struct knob_entry_definition {
     struct knob_entry knob;
     u16 av_length;
     struct knob_vendor ** av_vendors;
+    int blocked_by_cpuid;
 };
 
 struct knob_entry_definition * x86_adapt_get_all_knobs(void);

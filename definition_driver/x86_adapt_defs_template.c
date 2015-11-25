@@ -1,4 +1,5 @@
 #include <linux/module.h>
+#include <asm/processor.h>
 
 #include "../definition_driver/x86_adapt_defs.h"
 
@@ -13,6 +14,7 @@
 
 struct knob_entry_definition * x86_adapt_get_all_knobs(void)
 {
+  do_cpuid_checks();
   return all_knobs;
 }
 

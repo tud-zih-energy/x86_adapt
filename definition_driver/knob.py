@@ -1,3 +1,11 @@
+class CpuIdCondition():
+     operation=None
+     check=None
+
+     def __init__(self, operation, check):
+         self.operation=operation.strip()
+         self.check=check.strip()
+
 class Knob():
     name=""
     description=""
@@ -8,6 +16,7 @@ class Knob():
     reserved_settings=[]
     processor_groups=[]
     nda=False
+    cpuid=None
     def __init__(self, inputfilename):
         self.name=inputfilename[inputfilename.rfind('/')+1:inputfilename.rfind('.')]
 
@@ -20,6 +29,7 @@ class Knob():
    	self.processor_groups=[]
    	self.readonly=False
    	self.nda=False
+        self.cpuid=None
 
         inputfile=open(inputfilename)
         data = list(inputfile)
@@ -41,11 +51,13 @@ class Knob():
                     self.restricted_settings=data[line_nr+1].strip().split(',')
                 if (data[line_nr].strip()=='//#reserved_settings'):
                     self.reserved_settings=data[line_nr+1].strip().split(',')
-            if (data[line_nr].strip().upper() == '//#NDA'):
+            if (data[line_nr+1].strip().upper() == '//#NDA'):
                 self.nda=True
             if (data[line_nr].strip()=='//#processor_groups'):
                 self.processor_groups=data[line_nr+1].strip().split(',')
-        # second check if in last line :/
-        if (data[len(data)-1].strip().upper() == '//#NDA'):
-            self.nda=True
+            if (data[line_nr].strip()=='//#CPUID'):
+                items=data[line_nr+1].split(',')
+                if len(items) != 2:
+                    print("Malformed CPUID entry in knob definition "+inputfilename)
+                self.cpuid=CpuIdCondition(items[0],items[1])
         inputfile.close()

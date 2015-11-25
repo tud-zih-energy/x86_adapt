@@ -125,10 +125,11 @@ for knob in knobs:
         text = text + "};\n"
     
 
-text = text + "static u32 all_knobs_length="+str(len(knobs))+";\n"
-text = text + "static struct knob_entry_definition all_knobs [] = {\n"
 
 nda=False
+
+text = text + "static u32 all_knobs_length="+str(len(knobs))+";\n"
+text = text + "static struct knob_entry_definition all_knobs [] = {\n"
 
 for knob in knobs:
     text = text + "\t{\n"
@@ -168,14 +169,31 @@ for knob in knobs:
         text = text + "\t.knob.reserved_settings=resvd_setting_"+knob.name+",\n"
     text = text + "\t.av_length="+str(len(knob.processor_groups))+",\n"
     if len(knob.processor_groups) > 1:
-        text = text + "\t.av_vendors=processorgroups_"+knob.name+"}\n,"
+        text = text + "\t.av_vendors=processorgroups_"+knob.name+",\n"
     else:
-        text = text + "\t.av_vendors="+knob.processor_groups[0]+"_ref}\n,"
+        text = text + "\t.av_vendors="+knob.processor_groups[0]+"_ref\n,"
+    text = text + "\t.blocked_by_cpuid=0}\n,"
+	
     
     if knob.nda:
         nda = True
+
+# remove trailing coma
 text = text[0:-1]
+
 text = text + "};\n"
+
+# cpuid filter
+text = text + "static inline void do_cpuid_checks(void){\n"
+text = text + "  unsigned int eax,ebx,ecx,edx;\n"
+index = 0
+for knob in knobs:
+    if knob.cpuid:
+        text = text + "  cpuid("+knob.cpuid.operation+",&eax,&ebx,&ecx,&edx);\n"
+        text = text + "  if (! ("+knob.cpuid.check+"))\n"
+        text = text + "    all_knobs["+str(index)+"].blocked_by_cpuid=1;\n\n"
+    index = index + 1
+text = text + "}"
 
 # now open template
 # and replace "#template_holder" with text
@@ -196,6 +214,8 @@ if nda:
 "/* Do not distribute it, do not copy it, do not make it available to anyone! */\n"
 "/*****************************************************************************/\n"
 )
+
+
 for line in templatefile:
     if line.strip()=="#template_holder":
         targetfile.write(text)

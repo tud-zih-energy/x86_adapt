@@ -345,6 +345,9 @@ static void traverse_knobs(u32 *nr_knobs_cpu, u32 *nr_knobs_node,
 
     /* for all knobs do something */
     for (i = 0;i<all_knobs_length;i++) {
+        /* if cpuid check failed, dont use this item */
+        if (all_knobs[i].blocked_by_cpuid)
+            continue;
       //printk("Check :%s\n",all_knobs[i].knob.name);
         for (j = 0;j<all_knobs[i].av_length;j++) {
             /* check vendor */
