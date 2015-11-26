@@ -55,14 +55,15 @@ lines. Every variable except restricted_settings is mandatory.
 value: String. use this to describe the new feature.
 //#device
 possible values: MSR, NB_F0, NB_F1, NB_F2, NB_F3, NB_F4, NB_F5, SB_PCU0, SB_PCU1, 
- SB_PCU2, HSW_PCU0, HSW_PCU1, HSW_PCU2. This reflects the PCI Device/Function or MSR.
+ SB_PCU2, HSW_PCU0, HSW_PCU1, HSW_PCU2, MSRNODE. This reflects the PCI Device/Function or MSR.
+MSRNODE should be used for MSRs that are available once per package/NUMA node.
 //#register_index
 value: hex number. This defines the MSR/PCI register number.
 //#bit_mask
 value: bitmask in C syntax. This is used to make only parts of the register available.
-//#restricted_settings
+//#restricted_settings (optional)
 value: allowed settings separated by comas, or "readonly"
-//#reserved_settings
+//#reserved_settings (optional)
 value: unallowed settings separated by comas
 //#processor_groups
 value: one or more processor groups delimited by ','

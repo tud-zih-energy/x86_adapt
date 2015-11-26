@@ -14,7 +14,7 @@ enum{
     HSW_PCU0, /* Device 30, Function 0 */
     HSW_PCU1, /* Device 30, Function 1 */
     HSW_PCU2, /* Device 30, Function 2 */
-    UNCORE,
+    MSRNODE, /* MSRs that are available once per package */
 };
 
 /* 4 byte id + 1 byte length + 4 byte name length + 4 byte description length */

@@ -238,7 +238,7 @@ static struct knob_entry * active_knobs_cpu = NULL;
 
 static u64 ** defaults_cpu = NULL;
 
-static u64 read_setting(int dev_nr, struct knob_entry knob) ;
+static int read_setting(int dev_nr, struct knob_entry knob,u64 * setting) ;
 
 /* This function gives you the bus id for uncore components of a NUMA node in sandy bridge ep processors */
 static int get_uncore_bus_id(int node_id)
@@ -410,15 +410,17 @@ static inline void free_defaults(void)
     }
 }
 
-static inline void read_defaults(void)
+static inline int read_defaults(void)
 {
-    u32 node, cpu, knob;
+    u32 node, cpu, knob,ret;
     /* read defaults */
     for (node=0;node<num_possible_nodes();node++)
     {
         for (knob=1;knob<active_knobs_node_length;knob++)
         {
-             defaults_node[node][knob-1]=read_setting(node,active_knobs_node[knob]);
+             ret = read_setting(node,active_knobs_node[knob],&defaults_node[node][knob-1]);
+             if (ret)
+                 return ret;
         }
     }
     
@@ -426,9 +428,12 @@ static inline void read_defaults(void)
     {
         for (knob=1;knob<active_knobs_cpu_length;knob++)
         {
-             defaults_cpu[cpu][knob-1]=read_setting(cpu,active_knobs_cpu[knob]);
+             ret = read_setting(cpu,active_knobs_cpu[knob],&defaults_cpu[cpu][knob-1]);
+             if (ret)
+                 return ret;
         }
     }
+    return 0;
 }
 
 /* used at init */
@@ -545,7 +550,7 @@ __always_inline static u64 get_setting_from_register_reading(u64 register_readin
 }
 
 /* reads the setting of msr / pci knob */
-static u64 read_setting(int dev_nr, struct knob_entry knob) 
+static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading) 
 {
     u64 register_reading = 0;
     u32 l = 0,h;
@@ -598,8 +603,19 @@ static u64 read_setting(int dev_nr, struct knob_entry knob)
             case HSW_PCU2:
                 nb = hsw_pcu2[dev_nr];
                 break;
-            case UNCORE:
+            case MSRNODE:
+            {
+                const struct cpumask * mask = cpumask_of_node(dev_nr);
+                int cpu=cpumask_first(mask);
+                if (cpu<nr_cpu_ids)
+                {
+                    rdmsr_on_cpu(cpu, knob.register_index,&l, &h);
+                    register_reading = (l|(((u64)h)<<32));
+                }
+                else
+                    return -ENXIO;
                 break;
+            }
         }
         if (nb) {
             pci_read_config_dword(nb,knob.register_index,&l);
@@ -607,14 +623,16 @@ static u64 read_setting(int dev_nr, struct knob_entry knob)
     }
     } else {
         printk(KERN_ERR "Failed to read setting of knob %s. Can not find device %d.\n", knob.name ,dev_nr);
+        return -ENXIO;
     }
-    return register_reading;
+    reading[0]=register_reading;
+    return 0;
 }
 
 /* writes the setting to msr / pci knob */
 static int write_setting(int dev_nr, struct knob_entry knob, u64 setting) 
 {
-    u32 l = 0,h = 0,i;
+    u32 l = 0,h = 0,i,ret;
     u64 orig_setting;
 
 
@@ -633,7 +651,9 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
 
 
     /* read register */
-    orig_setting = read_setting(dev_nr,knob);
+    ret = read_setting(dev_nr,knob,&orig_setting);
+    if (ret)
+        return ret;
 
     /* avoid a bitmask of 0 and prepare align setting according to bitmask */
     for (i = 0;i<64;i++) {
@@ -697,8 +717,18 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
             case HSW_PCU2:
                 nb = hsw_pcu2[dev_nr];
                 break;
-            case UNCORE:
+            case MSRNODE:
+            {
+                const struct cpumask * mask = cpumask_of_node(dev_nr);
+                int cpu=cpumask_first(mask);
+                if (cpu<nr_cpu_ids)
+                {
+                    wrmsr_on_cpu(cpu, knob.register_index,l, h);
+                }
+                else
+                    return -ENXIO;
                 break;
+            }
         }
         /* write to PCI device */
         if (nb)
@@ -876,6 +906,8 @@ static ssize_t do_read(struct file * file, char * buf,
     char* end;
     u64 setting = 0;
 
+    int ret;
+
     /* can not read reset */
     if ( *ppos == KNOB_RESET )
     {
@@ -912,18 +944,26 @@ static ssize_t do_read(struct file * file, char * buf,
             if (type == X86_ADAPT_CPU) {
                 int i;
                 for_each_online_cpu(i) {
-                    tmp = read_setting(i,entries[*ppos]);
-                    setting |= tmp;
+                    ret = read_setting(i,entries[*ppos],&tmp);
+                    if (ret)
+                        return ret;
+                    else
+                        setting |= tmp;
                 }
             } else {
                 int i;
                 for_each_online_node(i) {
-                    tmp = read_setting(i,entries[*ppos]);
-                    setting |= tmp;
+                    ret = read_setting(i,entries[*ppos],&tmp);
+                    if (ret)
+                        return ret;
+                    else
+                        setting |= tmp;
                 }
             }
         } else {
-            setting = read_setting(dev_nr,entries[*ppos]);
+           ret = read_setting(dev_nr,entries[*ppos],&setting);
+           if (ret)
+               return ret;
         }
         /* shift it */
         setting = get_setting_from_register_reading(setting, entries[*ppos].bitmask);
@@ -931,7 +971,6 @@ static ssize_t do_read(struct file * file, char * buf,
         if (copy_to_user(buf, &setting, 8)) {
             return -EFAULT;
         }
-        //((u64 *)buf)[0] = setting;
         return 8;
     } else {
         // printk(KERN_ERR "Wrong id\n");
@@ -1160,7 +1199,7 @@ static int __init x86_adapt_init(void)
 
     /* Based on:
      * Intel Xeon Processor E5 Product Family Datasheet- Volume Two: Registers
-     * Intel Xeon Processor E5 v2 Product Family Datasheet- Volume Two: Registers */
+     * Intel Xeon Processor E5 v3 Product Family Datasheet- Volume Two: Registers */
     ALLOC_UNCORE_PCI(sb_pcu0,10,0);
     ALLOC_UNCORE_PCI(sb_pcu1,10,1);
     ALLOC_UNCORE_PCI(sb_pcu2,10,2);
@@ -1168,7 +1207,11 @@ static int __init x86_adapt_init(void)
     ALLOC_UNCORE_PCI(hsw_pcu1,30,1);
     ALLOC_UNCORE_PCI(hsw_pcu2,30,2);
 
-    read_defaults();
+    err = read_defaults();
+    if (err) {
+        printk(KERN_ERR "Failed to read defaults\n");
+        goto fail;
+    }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
     __register_hotcpu_notifier(&x86_adapt_cpu_notifier);
