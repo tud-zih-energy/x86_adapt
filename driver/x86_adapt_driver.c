@@ -424,14 +424,14 @@ static inline int read_defaults(void)
         }
     }
     
-    for (cpu=0;cpu<num_possible_cpus();cpu++)
+    for (cpu=0;cpu<num_present_cpus();cpu++)
     {
         for (knob=1;knob<active_knobs_cpu_length;knob++)
         {
              ret = read_setting(cpu,active_knobs_cpu[knob],&defaults_cpu[cpu][knob-1]);
              if (ret)
                  return ret;
-        }
+       }
     }
     return 0;
 }
@@ -502,7 +502,6 @@ static int buildup_entries(void)
     return 0;
 
 fail:
-    free_defaults();
     return -ENOMEM;
 
 }
@@ -554,16 +553,19 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
 {
     u64 register_reading = 0;
     u32 l = 0,h;
+    int err = 0;
     /* switch device */
     if (dev_nr >= 0) {
         struct pci_dev * nb = NULL;
         switch (knob.device) {
             case MSR:
+                if (!cpu_online(dev_nr))
+                    return -ENXIO;
                 if ( cpumask_equal(get_cpu_mask(dev_nr),&(current->cpus_allowed))) {
                     register_reading = native_read_msr(knob.register_index);
                 }
                 else {
-                    rdmsr_on_cpu(dev_nr, knob.register_index,&l, &h);
+                    err = rdmsr_on_cpu(dev_nr, knob.register_index,&l, &h);
                     register_reading = (l|(((u64)h)<<32));
                 }
                 break;
@@ -606,11 +608,35 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
             case MSRNODE:
             {
                 const struct cpumask * mask = cpumask_of_node(dev_nr);
-                int cpu=cpumask_first(mask);
-                if (cpu<nr_cpu_ids)
+                const struct cpumask * online = cpumask_of_node(dev_nr);
+                struct cpumask node_online;
+                /* if there is an online cpu from the node */
+                if (cpumask_and(&node_online,mask,online))
                 {
-                    rdmsr_on_cpu(cpu, knob.register_index,&l, &h);
-                    register_reading = (l|(((u64)h)<<32));
+                    int cpu;
+                    /* get the first of the online cpus */
+                    /* check whether this tasks cpu is on node */
+                    struct thread_info *ti =task_thread_info(current);
+                    cpu=ti->cpu;
+                    /* if this task is already on the node, use this tasks cpu */
+                    if (cpumask_test_cpu(cpu,&node_online))
+                    {
+                        err = rdmsr_on_cpu(cpu, knob.register_index,&l, &h);
+                        register_reading = (l|(((u64)h)<<32));
+                    }
+                    else
+                    {
+                        cpu=cpumask_first(&node_online);
+                        /* any online? (2nd check to be really sure) */
+                        if (cpu<nr_cpu_ids)
+                        {
+                            err = rdmsr_on_cpu(cpu, knob.register_index,&l, &h);
+                            register_reading = (l|(((u64)h)<<32));
+                        }
+                        /* none online :( */
+                        else
+                            return -ENXIO;
+                    }
                 }
                 else
                     return -ENXIO;
@@ -618,7 +644,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
             }
         }
         if (nb) {
-            pci_read_config_dword(nb,knob.register_index,&l);
+            err = pci_read_config_dword(nb,knob.register_index,&l);
             register_reading = l;
     }
     } else {
@@ -626,7 +652,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
         return -ENXIO;
     }
     reading[0]=register_reading;
-    return 0;
+    return err;
 }
 
 /* writes the setting to msr / pci knob */
@@ -634,6 +660,7 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
 {
     u32 l = 0,h = 0,i,ret;
     u64 orig_setting;
+    int err=0;
 
 
     /* check whether setting is valid */
@@ -678,7 +705,7 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
                     native_write_msr(knob.register_index,l,h);
                 }
                 else {
-                    wrmsr_on_cpu(dev_nr, knob.register_index,l, h);
+                    err = wrmsr_on_cpu(dev_nr, knob.register_index,l, h);
                 }
                 break;
             case NB_F0:
@@ -720,10 +747,33 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
             case MSRNODE:
             {
                 const struct cpumask * mask = cpumask_of_node(dev_nr);
-                int cpu=cpumask_first(mask);
-                if (cpu<nr_cpu_ids)
+                const struct cpumask * online = cpumask_of_node(dev_nr);
+                struct cpumask node_online;
+                /* if there is an online cpu from the node */
+                if (cpumask_and(&node_online,mask,online))
                 {
-                    wrmsr_on_cpu(cpu, knob.register_index,l, h);
+                    int cpu;
+                    /* get the first of the online cpus */
+                    /* check whether this tasks cpu is on node */
+                    struct thread_info *ti =task_thread_info(current);
+                    cpu=ti->cpu;
+                    /* if this task is already on the node, use this tasks cpu */
+                    if (cpumask_test_cpu(cpu,&node_online))
+                    {
+                        err = wrmsr_on_cpu(cpu, knob.register_index,l, h);
+                    }
+                    else
+                    {
+                        cpu=cpumask_first(&node_online);
+                        /* any online? (2nd check to be really sure) */
+                        if (cpu<nr_cpu_ids)
+                        {
+                            err = wrmsr_on_cpu(cpu, knob.register_index,l, h);
+                        }
+                        /* none online :( */
+                        else
+                            return -ENXIO;
+                    }
                 }
                 else
                     return -ENXIO;
@@ -732,8 +782,8 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
         }
         /* write to PCI device */
         if (nb)
-           pci_write_config_dword(nb,knob.register_index,l);
-        return 0;
+           err = pci_write_config_dword(nb,knob.register_index,l);
+        return err;
     } else {
         printk(KERN_ERR "Failed to write setting of knob %s. Can not find device %d.\n", knob.name ,dev_nr);
         return -ENXIO;
@@ -1112,11 +1162,11 @@ static int x86_adapt_cpu_callback(struct notifier_block *nfb,
     int err = 0;
 
     switch (action) {
-        case CPU_ONLINE:
+        case CPU_ONLINE: /* fall-through */
         case CPU_ONLINE_FROZEN:
             err = x86_adapt_device_create(cpu);
             break;
-        case CPU_DEAD:
+        case CPU_DEAD: /* fall-through */
         case CPU_DEAD_FROZEN:
             device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
                 MINOR(x86_adapt_cpu_device)+cpu));
@@ -1250,6 +1300,11 @@ fail:
     FREE_PCI(hsw_pcu1);
     FREE_PCI(hsw_pcu2);
     free_defaults();
+
+    if (x86_adapt_class != NULL)
+    {
+        class_destroy(x86_adapt_class);
+    }
 
     put_online_cpus();
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
