@@ -10,6 +10,7 @@ Integrating performance analysis and energy efficiency optimizations in a unifie
 - python
 - make
 - gcc
+- cmake > 2.8
 - linux kernel > version //TODO: test old debian with 2.6.32
 - linux kernel headers
 
