@@ -20,15 +20,15 @@ class Knob():
     def __init__(self, inputfilename):
         self.name=inputfilename[inputfilename.rfind('/')+1:inputfilename.rfind('.')]
 
-	self.description=""
-   	self.device=None
-   	self.register_index=None
-   	self.bit_mask=None
-   	self.restricted_settings=[]
-   	self.reserved_settings=[]
-   	self.processor_groups=[]
-   	self.readonly=False
-   	self.nda=False
+        self.description=""
+        self.device=None
+        self.register_index=None
+        self.bit_mask=None
+        self.restricted_settings=[]
+        self.reserved_settings=[]
+        self.processor_groups=[]
+        self.readonly=False
+        self.nda=False
         self.cpuid=None
 
         inputfile=open(inputfilename)
