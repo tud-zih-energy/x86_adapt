@@ -555,6 +555,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
     u32 l = 0,h;
     int err = 0;
     /* switch device */
+    printk(KERN_INFO "Reading knob %s on device %d.\n", knob.name ,dev_nr);
     if (dev_nr >= 0) {
         struct pci_dev * nb = NULL;
         switch (knob.device) {
