@@ -27,7 +27,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 /* allocates dynamicly a char device region, intializes it and adds it */
 #define ALLOC_AND_INIT(DEV, FUNC, TYPE) \
     do { \
-        err = alloc_chrdev_region(&(DEV##_device),0,num_possible_##TYPE##s()+1,#DEV); \
+        err = alloc_chrdev_region(&(DEV##_device),0,num_online_##TYPE##s()+1,#DEV); \
         if (err) { \
             printk(KERN_ERR "Failed to allocate chrdev_region for %s\n", #DEV); \
             goto fail; \
@@ -38,7 +38,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
         init_rwsem(&(DEV##_cdev.rwsem));\
         cdev_init(&(DEV##_cdev.cdev), & DEV##_fops); \
         DEV##_cdev.cdev.owner = THIS_MODULE; \
-        err = cdev_add(&(DEV##_cdev.cdev), DEV##_device, num_possible_##TYPE##s()+1); \
+        err = cdev_add(&(DEV##_cdev.cdev), DEV##_device, num_online_##TYPE##s()+1); \
         if (err) { \
             printk(KERN_ERR "Failed to add cdev for %s\n", #DEV); \
             goto fail; \
@@ -50,7 +50,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 /* allocates memory for a northbridge pci device and adds it */
 #define ALLOC_UNCORE_PCI(NAME, NUM, NUM2) \
     do { \
-        NAME = kmalloc(num_possible_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
+        NAME = kmalloc(num_online_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
         if (NAME == NULL) { \
             err = -ENOMEM; \
             printk(KERN_ERR "Failed to allocate memory for %d %d\n", NUM,NUM2); \
@@ -65,7 +65,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 /* allocates memory for a northbridge pci device and adds it */
 #define ALLOC_NB_PCI(NUM) \
     do { \
-        nb_f##NUM = kmalloc(num_possible_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
+        nb_f##NUM = kmalloc(num_online_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
         if (nb_f##NUM == NULL) { \
             err = -ENOMEM; \
             printk(KERN_ERR "Failed to allocate memory for nb_fd%d\n", NUM); \
@@ -85,7 +85,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
             cdev_del(&(DEV##_cdev.cdev)); \
         FUNC(DEV, TYPE); \
         if (DEV##_device_ok) \
-            unregister_chrdev_region(DEV##_device, num_possible_##TYPE##s()+1); \
+            unregister_chrdev_region(DEV##_device, num_online_##TYPE##s()+1); \
     } while (0)
 
 /* frees the allocated space for this pci device */
@@ -128,7 +128,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
             } \
         } \
         dev = device_create(x86_adapt_class,NULL,MKDEV(MAJOR(DEV##_device), \
-            MINOR(DEV##_device)+num_possible_##TYPE##s()),NULL,"%s_all",#TYPE); \
+            MINOR(DEV##_device)+num_online_##TYPE##s()),NULL,"%s_all",#TYPE); \
         if (IS_ERR(dev)) { \
             printk(KERN_ERR "Failed to create device /sys/class/x86_adapt/%s_all\n",#TYPE); \
             err = PTR_ERR(dev); \
@@ -144,7 +144,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
                 MINOR(DEV##_device)+i)); \
         } \
             device_destroy(x86_adapt_class,MKDEV(MAJOR(DEV##_device), \
-                MINOR(DEV##_device)+num_possible_##TYPE##s())); \
+                MINOR(DEV##_device)+num_online_##TYPE##s())); \
     } while (0)
 
 /* create definition devices */
@@ -390,7 +390,7 @@ static inline void free_defaults(void)
     active_knobs_node = NULL;
     if (defaults_node != NULL)
     {
-        for (index=0;index<num_possible_nodes();index++)
+        for (index=0;index<num_online_nodes();index++)
         {
             if (defaults_node[index]!=NULL)
                 kfree(defaults_node[index]);
@@ -400,7 +400,7 @@ static inline void free_defaults(void)
     }
     if (defaults_cpu != NULL)
     {
-        for (index=0;index<num_possible_cpus();index++)
+        for (index=0;index<num_online_cpus();index++)
         {
             if (defaults_cpu[index]!=NULL)
                 kfree(defaults_cpu[index]);
@@ -414,23 +414,27 @@ static inline int read_defaults(void)
 {
     u32 node, cpu, knob,ret;
     /* read defaults */
-    for (node=0;node<num_possible_nodes();node++)
+    for (node=0;node<num_online_nodes();node++)
     {
         for (knob=1;knob<active_knobs_node_length;knob++)
         {
              ret = read_setting(node,active_knobs_node[knob],&defaults_node[node][knob-1]);
-             if (ret)
+             if (ret) {
+                 printk(KERN_ERR "Failed to read default setting for knob %s on node %i\n", active_knobs_node[knob].name, node);
                  return ret;
+             }
         }
     }
     
-    for (cpu=0;cpu<num_present_cpus();cpu++)
+    for (cpu=0;cpu<num_online_cpus();cpu++)
     {
         for (knob=1;knob<active_knobs_cpu_length;knob++)
         {
              ret = read_setting(cpu,active_knobs_cpu[knob],&defaults_cpu[cpu][knob-1]);
-             if (ret)
+             if (ret){
+                 printk(KERN_ERR "Failed to read default setting for knob %s on CPU %i\n", active_knobs_node[knob].name, cpu);
                  return ret;
+             }
        }
     }
     return 0;
@@ -463,10 +467,10 @@ static int buildup_entries(void)
     /* allocate memory for defaults (node) */
 
 
-    defaults_node = kzalloc(num_possible_nodes()*sizeof(u64*),GFP_KERNEL);
+    defaults_node = kzalloc(num_online_nodes()*sizeof(u64*),GFP_KERNEL);
     if (unlikely(defaults_node == NULL))
         goto fail;
-    for (index=0;index<num_possible_nodes();index++)
+    for (index=0;index<num_online_nodes();index++)
     {
         defaults_node[index] = kmalloc(nr_knobs_node*sizeof(u64),GFP_KERNEL);
         if (unlikely(defaults_node[index] == NULL))
@@ -476,10 +480,10 @@ static int buildup_entries(void)
     /* allocate memory for defaults (CPU) */
 
 
-    defaults_cpu = kzalloc(num_possible_cpus()*sizeof(u64*),GFP_KERNEL);
+    defaults_cpu = kzalloc(num_online_cpus()*sizeof(u64*),GFP_KERNEL);
     if (unlikely(defaults_cpu == NULL))
         goto fail;
-    for (index=0;index<num_possible_cpus();index++)
+    for (index=0;index<num_online_cpus();index++)
     {
         defaults_cpu[index] = kmalloc(nr_knobs_cpu*sizeof(u64),GFP_KERNEL);
         if (unlikely(defaults_cpu[index] == NULL))
@@ -1194,14 +1198,14 @@ static char* x86_adapt_devnode(struct device *dev, mode_t *mode)
     if (max == MAJOR(x86_adapt_cpu_device)) {
       if(mode)
           *mode = S_IRUGO | S_IWUSR | S_IWGRP;
-        if (min == num_possible_cpus())
+        if (min == num_online_cpus())
             return kasprintf(GFP_KERNEL, "x86_adapt/cpu/all");
         else 
             return kasprintf(GFP_KERNEL, "x86_adapt/cpu/%u", min);
     } else if (max == MAJOR(x86_adapt_node_device)) {
       if(mode)
           *mode = S_IRUGO | S_IWUGO;
-        if (min == num_possible_nodes())
+        if (min == num_online_nodes())
             return kasprintf(GFP_KERNEL, "x86_adapt/node/all");
         else
             return kasprintf(GFP_KERNEL, "x86_adapt/node/%u", min);
