@@ -14,7 +14,6 @@
 
 struct knob_entry_definition * x86_adapt_get_all_knobs(void)
 {
-  do_cpuid_checks();
   return all_knobs;
 }
 
@@ -29,6 +28,7 @@ EXPORT_SYMBOL(x86_adapt_get_all_knobs_length);
 static int __init x86_adapt_definition_init(void)
 {
   int err=0;
+  do_cpuid_checks();
   return err;
 }
 
