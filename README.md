@@ -42,6 +42,14 @@ Remarks:
 You can also build a debian package with generate-deb.sh.
 This kernel module has to be rebuild with every kernel update.
 
+## CPU Hotplug and Resetting values
+x86_adapt allows users to reset all values of all available knobs to default settings.
+The corresponding default values to which the single registers are reset are read when the driver (not the definition) kernel module is loaded.
+If a CPU is taken offline while the module is loaded, the defaults are loaded when the CPU is taken online.
+Node-defaults are captured when the driver kernel module is loaded. If all CPUs of a node are taken offline, the kernel module will fail to load since node-wide MSR registers cannot be read under these circumstances.
+
+To reset all knobs of a device (cpu or node), write any 8 bytes to offset 0 of the corresponding device file.
+
 ##  Adding Features/Knobs
 
 To add a new Feature to the driver you have to create new txt file in 
