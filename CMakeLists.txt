@@ -78,6 +78,7 @@ install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION lib)
 install(TARGETS x86a_read DESTINATION bin)
 install(TARGETS x86a_write DESTINATION bin)
+install(DIRECTORY library/doc/man DESTINATION man)
 install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR}/kernel_module modules_install)")
 install(CODE "execute_process(COMMAND depmod)")
 
