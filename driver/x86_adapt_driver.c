@@ -1256,14 +1256,14 @@ static char* x86_adapt_devnode(struct device *dev, mode_t *mode)
 
     if (max == MAJOR(x86_adapt_cpu_device)) {
       if(mode)
-          *mode = S_IRUGO | S_IWUSR | S_IWGRP;
+          *mode = S_IRUSR | S_IWGRP | S_IWUSR | S_IWGRP;
         if (min == num_possible_cpus())
             return kasprintf(GFP_KERNEL, "x86_adapt/cpu/all");
         else 
             return kasprintf(GFP_KERNEL, "x86_adapt/cpu/%u", min);
     } else if (max == MAJOR(x86_adapt_node_device)) {
       if(mode)
-          *mode = S_IRUGO | S_IWUGO;
+          *mode = S_IRUSR | S_IWGRP | S_IWUSR | S_IWGRP;
         if (min == num_possible_nodes())
             return kasprintf(GFP_KERNEL, "x86_adapt/node/all");
         else
