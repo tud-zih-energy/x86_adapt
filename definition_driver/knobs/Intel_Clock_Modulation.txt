@@ -1,0 +1,12 @@
+//#description
+[0:3] On-Demand Clock Modulation Value at 6.25% granularity (4 bit value), [4]: Enable On-Demand Clock Modulation
+//#device
+MSR
+//#register_index
+0x19A
+//#bit_mask
+0x1F
+//#reserved_settings
+(0x10)
+//#processor_groups
+sandybridge, ivybridge, haswell, broadwell
