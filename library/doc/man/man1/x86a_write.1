@@ -1,0 +1,45 @@
+.TH "x86a_write" 1 "Thu Jan 7 2016" "x86adapt" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+x86a_write.c \- Application to set the value of x86_adapt configuration items on a system\&.  
+
+.SH SYNOPSIS
+x86a_write [ x86a_write-ARGS \&.\&.\&.]
+
+
+.SH OPTIONS
+.PP
+.nf
+Usage: x86a_write [ x86a_write-ARGS \&.\&.\&.]
+x86a_write-ARGS:
+      -h --help: print this help
+      -H --hex: set in hexadecimal form
+      -n --node: set node options instead of CPU options
+      -c --cpu: Set item of this CPU (default=all)
+     	If -n is set, set the item of this node (default=all).
+      -i --item: set this item
+      -V --value: set to this value
+      -v --verbose: print more information
+.fi
+.PP
+ (The term 'node' refers to a node in the Linux context, which is a NUMA node (e\&.g\&., a physical processor) )\&.
+.PP
+.PP
+.nf
+.SH EXAMPLES
+x86a_write -V Intel_Energy_Performance_Bias -o 0 # sets the item "Intel_Energy_Performance_Bias" on all cpus to 0
+.PP 
+x86a_write -c 2 -V Intel_Energy_Performance_Bias -o 0 # sets the item "Intel_Energy_Performance_Bias" on cpu 2 to 0
+.PP 
+x86a_write -c 2 -V Intel_Energy_Performance_Bias -H -o F # sets the item "Intel_Energy_Performance_Bias" on cpu 2 to 15 (F in hexadecimal)
+.PP
+.SH SEE ALSO
+.PP
+Use the tool \fBx86a_read\fP to query all available knobs and their values on the system\&.
+.PP
+.SH TODO
+merge code from \fBx86a_read\&.c\fP and \fBx86a_write\&.c\fP 
+
+.SH "Author"
+Robert Schoene robert.schoene@tu-dresden.de 

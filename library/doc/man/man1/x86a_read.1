@@ -1,0 +1,63 @@
+.TH "x86a_read" 1 "Thu Jan 7 2016" "x86adapt" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+x86a_read \- Application to read the values of available x86_adapt configuration items on a system\&.  
+
+.SH SYNOPSIS
+x86a_read [ x86a_read-ARGS \&.\&.\&.]
+.SH "OUTPUT"
+Invoking the x86a_read tool prints a list of knobs: 
+.PP
+.nf
+Item 0: Intel_Clock_Modulation_Value
+----------------
+Item 1: Intel_DCU_Prefetch_Disable
+----------------
+Item 2: Intel_Enhanced_SpeedStep
+----------------
+Item 3: Intel_Target_PState
+[\&.\&.\&.]
+
+.fi
+.PP
+ Afterwards, the tool prints the current settings of each knob or selected knobs as CSV\&.
+.PP
+.SH OPTIONS
+.PP
+.nf
+Usage: x86a_read [ x86a_read-ARGS \&.\&.\&.]
+x86a_read-ARGS:
+     -h --help: print this help
+     -H --hex: print readings in hexadecimal form
+     -n --node: print node options instead of CPU options
+     -c --cpu: Read item(s) from this CPU (default=all)
+        If -n is set, read item(s) from this node (default=all)\&.
+     -i --item: Read this item (default=all)
+     -v --verbose: print more information
+
+.fi
+.PP
+ (The term 'node' refers to a node in the Linux context, which is a NUMA node (e\&.g\&., a physical processor) )\&.
+.PP
+.PP
+.nf
+.SH EXAMPLES
+x86a_read -c 0 # prints all items and the readings for CPU 0
+.PP 
+x86a_read -n 0 -c 0 # prints all items and the readings for node 0
+.PP 
+x86a_read -n 0 -c 0 -X # prints all items and the readings for node 0 in hexadecimal
+.PP 
+x86a_read -i Intel_Clock_Modulation_Value -c 0 -X # prints the item Intel_Clock_Modulation_Value and its reading for CPU 0 in hexadecimal
+.fi
+.PP
+.SH SEE ALSO
+.PP
+Use the tool \fBx86a_write\fP to change a setting\&.
+.PP
+.SH TODO
+merge code from \fBx86a_read\&.c\fP and \fBx86a_write\&.c\fP 
+
+.SH "Author"
+Robert Schoene robert.schoene@tu-dresden.de 
