@@ -213,6 +213,10 @@ printf("Set configuration item 0 of CPU 0 to %"PRIu64"\n",value);
 #ifndef X86_ADAPT_LIB_H_
 #define X86_ADAPT_LIB_H_
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #include <stdint.h>
 
 /**
@@ -540,5 +544,9 @@ int x86_adapt_set_setting(int fd, int id, uint64_t setting);
  * @brief This closes all still-open file descriptors and free's data structures
  */
 void x86_adapt_finalize(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
