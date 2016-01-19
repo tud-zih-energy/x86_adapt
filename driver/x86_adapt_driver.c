@@ -50,14 +50,20 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 /* allocates memory for a northbridge pci device and adds it */
 #define ALLOC_UNCORE_PCI(NAME, NUM, NUM2) \
     do { \
-        NAME = kmalloc(num_possible_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
+        NAME = kzalloc(num_possible_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
         if (NAME == NULL) { \
             err = -ENOMEM; \
-            printk(KERN_ERR "Failed to allocate memory for %d %d\n", NUM,NUM2); \
+            printk(KERN_ERR "Failed to allocate memory for uncore device %d %d\n", NUM,NUM2); \
             goto fail; \
         } \
-        for_each_online_node(i) \
+        for_each_node(i) \
             NAME [i] = pci_get_bus_and_slot(get_uncore_bus_id(i), PCI_DEVFN(NUM,NUM2)); \
+            if ( NAME [i] == NULL) \
+            { \
+                err = -ENODEV; \
+                printk(KERN_ERR "Failed to find uncore device on node %d\n",i); \
+                goto fail; \
+            } \
     } while (0)
 
 
@@ -71,7 +77,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
             printk(KERN_ERR "Failed to allocate memory for nb_fd%d\n", NUM); \
             goto fail; \
         } \
-        for_each_online_node(i) \
+        for_each_node(i) \
             if (node_to_amd_nb(i)!=NULL) \
               nb_f##NUM [i] = pci_get_bus_and_slot(0, PCI_DEVFN(PCI_SLOT(node_to_amd_nb(i)->misc->devfn),NUM)); \
             else \
