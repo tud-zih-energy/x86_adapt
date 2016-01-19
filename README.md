@@ -70,6 +70,8 @@ MSRNODE should be used for MSRs that are available once per package/NUMA node.
 value: hex number. This defines the MSR/PCI register number.
 //#bit_mask
 value: bitmask in C syntax. This is used to make only parts of the register available.
+Some PCI definitions span over two 32-bit registers to provide a virtual 64 bit register (e.g., the higher 4 byte are stored in register A4, the lower are stored in A0)
+In such a case you should specify the register index as A0 and the bit_mask as 0xFFFFFFFFFFFFFFFF.
 //#restricted_settings (optional)
 value: allowed settings separated by comas, or "readonly"
 //#reserved_settings (optional)
