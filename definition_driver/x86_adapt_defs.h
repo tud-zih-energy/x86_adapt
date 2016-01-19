@@ -14,8 +14,27 @@ enum{
     HSW_PCU0, /* Device 30, Function 0 */
     HSW_PCU1, /* Device 30, Function 1 */
     HSW_PCU2, /* Device 30, Function 2 */
+
     MSRNODE, /* MSRs that are available once per package */
+
+    HSW_PMON_HA0, /* Device 18, Function 1 */
+    HSW_PMON_HA1, /* Device 18, Function 5 */
+    HSW_PMON_MC0_CHAN0, /* Device 20, Function 0 */
+    HSW_PMON_MC0_CHAN1, /* Device 20, Function 1 */
+    HSW_PMON_MC0_CHAN2, /* Device 21, Function 0 */
+    HSW_PMON_MC0_CHAN3, /* Device 21, Function 1 */
+    HSW_PMON_MC1_CHAN0, /* Device 23, Function 0 */
+    HSW_PMON_MC1_CHAN1, /* Device 23, Function 1 */
+    HSW_PMON_MC1_CHAN2, /* Device 24, Function 0 */
+    HSW_PMON_MC1_CHAN3, /* Device 24, Function 1 */
+    HSW_PMON_IRP, /* Device 5, Function 6 */
+    HSW_PMON_QPI_P0, /* Device 8, Function 2 */
+    HSW_PMON_QPI_P1, /* Device 9, Function 2 */
+    HSW_PMON_R2PCIE, /* Device 16, Function 1 */
+    HSW_PMON_R3QPI_L0, /* Device 11, Function 1 */
+    HSW_PMON_R3QPI_L1, /* Device 11, Function 2 */
 };
+
 
 /* 4 byte id + 1 byte length + 4 byte name length + 4 byte description length */
 #define ENTRY_HEADER_SIZE 13 

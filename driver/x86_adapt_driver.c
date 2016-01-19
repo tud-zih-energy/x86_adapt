@@ -219,6 +219,27 @@ struct pci_dev ** hsw_pcu0 = NULL;
 struct pci_dev ** hsw_pcu1 = NULL;
 struct pci_dev ** hsw_pcu2 = NULL;
 
+/* Intel Haswell EP Performance Monitor registers*/
+/* TODO support 64 bit length with 2 PCI registers */
+
+struct pci_dev ** hsw_pmon_ha0 = NULL;
+struct pci_dev ** hsw_pmon_ha1 = NULL;
+struct pci_dev ** hsw_pmon_mc0_chan0 = NULL;
+struct pci_dev ** hsw_pmon_mc0_chan1 = NULL;
+struct pci_dev ** hsw_pmon_mc0_chan2 = NULL;
+struct pci_dev ** hsw_pmon_mc0_chan3 = NULL;
+struct pci_dev ** hsw_pmon_mc1_chan0 = NULL;
+struct pci_dev ** hsw_pmon_mc1_chan1 = NULL;
+struct pci_dev ** hsw_pmon_mc1_chan2 = NULL;
+struct pci_dev ** hsw_pmon_mc1_chan3 = NULL;
+struct pci_dev ** hsw_pmon_irp = NULL;
+struct pci_dev ** hsw_pmon_qpi_p0 = NULL;
+struct pci_dev ** hsw_pmon_qpi_p1 = NULL;
+struct pci_dev ** hsw_pmon_r2pcie = NULL;
+struct pci_dev ** hsw_pmon_r3qpi_l0 = NULL;
+struct pci_dev ** hsw_pmon_r3qpi_l1 = NULL;
+
+
 /* artificial knob for resetting */
 static struct knob_entry reset_knob =
 {
@@ -701,16 +722,84 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
                     return -ENXIO;
                 break;
             }
+
+            case HSW_PMON_HA0: /* Device 18, Function 1 */
+                nb = hsw_pmon_ha0[dev_nr];
+                break;
+            case HSW_PMON_HA1: /* Device 18, Function 5 */
+                nb = hsw_pmon_ha1[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN0: /* Device 20, Function 0 */
+                nb = hsw_pmon_mc0_chan0[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN1: /* Device 20, Function 1 */
+                nb = hsw_pmon_mc0_chan1[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN2: /* Device 21, Function 0 */
+                nb = hsw_pmon_mc0_chan2[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN3: /* Device 21, Function 1 */
+                nb = hsw_pmon_mc0_chan3[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN0: /* Device 23, Function 0 */
+                nb = hsw_pmon_mc1_chan0[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN1: /* Device 23, Function 1 */
+                nb = hsw_pmon_mc1_chan1[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN2: /* Device 24, Function 0 */
+                nb = hsw_pmon_mc1_chan2[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN3: /* Device 24, Function 1 */
+                nb = hsw_pmon_mc1_chan3[dev_nr];
+                break;
+            case HSW_PMON_IRP: /* Device 5, Function 6 */
+                nb = hsw_pmon_irp[dev_nr];
+                break;
+            case HSW_PMON_QPI_P0: /* Device 8, Function 2 */
+                nb = hsw_pmon_qpi_p0[dev_nr];
+                break;
+            case HSW_PMON_QPI_P1: /* Device 9, Function 2 */
+                nb = hsw_pmon_qpi_p1[dev_nr];
+                break;
+            case HSW_PMON_R2PCIE: /* Device 16, Function 1 */
+                nb = hsw_pmon_r2pcie[dev_nr];
+                break;
+            case HSW_PMON_R3QPI_L0: /* Device 11, Function 1 */
+                nb = hsw_pmon_r3qpi_l0[dev_nr];
+                break;
+            case HSW_PMON_R3QPI_L1: /* Device 11, Function 2 */
+                nb = hsw_pmon_r3qpi_l1[dev_nr];
+                break;
         }
         if (nb) {
+            h = 0;
             err = pci_read_config_dword(nb,knob.register_index,&l);
-            register_reading = l;
+            if (!err && (knob.bitmask >= (1ULL << 32)))
+            {
+                u32 l2;
+           	err = pci_read_config_dword(nb,knob.register_index+4,&h);
+                if ( err ) return err;
+                err = pci_read_config_dword(nb,knob.register_index,&l2);
+                if ( err ) return err;
+                /* if h-l pair is a counter, there might be an overflow in l */
+                while ( l2 < l )
+                {
+                    l=l2;
+           	    err = pci_read_config_dword(nb,knob.register_index+4,&h);
+                    if ( err ) return err;
+                    err = pci_read_config_dword(nb,knob.register_index,&l2);
+                    if ( err ) return err;
+                }
+                l=l2;
+            }
+           register_reading = (l|(((u64)h)<<32));
     }
     } else {
         printk(KERN_ERR "Failed to read setting of knob %s. Can not find device %d.\n", knob.name ,dev_nr);
         return -ENXIO;
     }
-    reading[0]=register_reading;
+    *reading=register_reading;
     return err;
 }
 
@@ -838,10 +927,64 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
                     return -ENXIO;
                 break;
             }
+
+            case HSW_PMON_HA0: /* Device 18, Function 1 */
+                nb = hsw_pmon_ha0[dev_nr];
+                break;
+            case HSW_PMON_HA1: /* Device 18, Function 5 */
+                nb = hsw_pmon_ha1[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN0: /* Device 20, Function 0 */
+                nb = hsw_pmon_mc0_chan0[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN1: /* Device 20, Function 1 */
+                nb = hsw_pmon_mc0_chan1[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN2: /* Device 21, Function 0 */
+                nb = hsw_pmon_mc0_chan2[dev_nr];
+                break;
+            case HSW_PMON_MC0_CHAN3: /* Device 21, Function 1 */
+                nb = hsw_pmon_mc0_chan3[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN0: /* Device 23, Function 0 */
+                nb = hsw_pmon_mc1_chan0[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN1: /* Device 23, Function 1 */
+                nb = hsw_pmon_mc1_chan1[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN2: /* Device 24, Function 0 */
+                nb = hsw_pmon_mc1_chan2[dev_nr];
+                break;
+            case HSW_PMON_MC1_CHAN3: /* Device 24, Function 1 */
+                nb = hsw_pmon_mc1_chan3[dev_nr];
+                break;
+            case HSW_PMON_IRP: /* Device 5, Function 6 */
+                nb = hsw_pmon_irp[dev_nr];
+                break;
+            case HSW_PMON_QPI_P0: /* Device 8, Function 2 */
+                nb = hsw_pmon_qpi_p0[dev_nr];
+                break;
+            case HSW_PMON_QPI_P1: /* Device 9, Function 2 */
+                nb = hsw_pmon_qpi_p1[dev_nr];
+                break;
+            case HSW_PMON_R2PCIE: /* Device 16, Function 1 */
+                nb = hsw_pmon_r2pcie[dev_nr];
+                break;
+            case HSW_PMON_R3QPI_L0: /* Device 11, Function 1 */
+                nb = hsw_pmon_r3qpi_l0[dev_nr];
+                break;
+            case HSW_PMON_R3QPI_L1: /* Device 11, Function 2 */
+                nb = hsw_pmon_r3qpi_l1[dev_nr];
+                break;
         }
         /* write to PCI device */
-        if (nb)
+        if (nb){
            err = pci_write_config_dword(nb,knob.register_index,l);
+           if (!err && (knob.bitmask >= ((u64)1 << 32)))
+           {
+           	err = pci_write_config_dword(nb,knob.register_index+4,h);
+           }
+        }
         return err;
     } else {
         printk(KERN_ERR "Failed to write setting of knob %s. Can not find device %d.\n", knob.name ,dev_nr);
@@ -1321,6 +1464,23 @@ static int __init x86_adapt_init(void)
     ALLOC_UNCORE_PCI(hsw_pcu1,30,1);
     ALLOC_UNCORE_PCI(hsw_pcu2,30,2);
 
+    ALLOC_UNCORE_PCI(hsw_pmon_ha0,18,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_ha1,18,5);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc0_chan0,20,0);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc0_chan1,20,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc0_chan2,21,0);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc0_chan3,21,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc1_chan0,23,0);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc1_chan1,23,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc1_chan2,24,0);
+    ALLOC_UNCORE_PCI(hsw_pmon_mc1_chan3,24,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_irp,5,6);
+    ALLOC_UNCORE_PCI(hsw_pmon_qpi_p0,8,2);
+    ALLOC_UNCORE_PCI(hsw_pmon_qpi_p1,9,2);
+    ALLOC_UNCORE_PCI(hsw_pmon_r2pcie,16,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_r3qpi_l0,11,1);
+    ALLOC_UNCORE_PCI(hsw_pmon_r3qpi_l1,11,2);
+
     err = read_defaults();
     if (err) {
         printk(KERN_ERR "Failed to read defaults\n");
@@ -1363,6 +1523,22 @@ fail:
     FREE_PCI(hsw_pcu0);
     FREE_PCI(hsw_pcu1);
     FREE_PCI(hsw_pcu2);
+    FREE_PCI(hsw_pmon_ha0);
+    FREE_PCI(hsw_pmon_ha1);
+    FREE_PCI(hsw_pmon_mc0_chan0);
+    FREE_PCI(hsw_pmon_mc0_chan1);
+    FREE_PCI(hsw_pmon_mc0_chan2);
+    FREE_PCI(hsw_pmon_mc0_chan3);
+    FREE_PCI(hsw_pmon_mc1_chan0);
+    FREE_PCI(hsw_pmon_mc1_chan1);
+    FREE_PCI(hsw_pmon_mc1_chan2);
+    FREE_PCI(hsw_pmon_mc1_chan3);
+    FREE_PCI(hsw_pmon_irp);
+    FREE_PCI(hsw_pmon_qpi_p0);
+    FREE_PCI(hsw_pmon_qpi_p1);
+    FREE_PCI(hsw_pmon_r2pcie);
+    FREE_PCI(hsw_pmon_r3qpi_l0);
+    FREE_PCI(hsw_pmon_r3qpi_l1);
     free_defaults();
 
     if (x86_adapt_class != NULL)
@@ -1409,6 +1585,23 @@ static void __exit x86_adapt_exit(void)
     FREE_PCI(hsw_pcu0);
     FREE_PCI(hsw_pcu1);
     FREE_PCI(hsw_pcu2);
+
+    FREE_PCI(hsw_pmon_ha0);
+    FREE_PCI(hsw_pmon_ha1);
+    FREE_PCI(hsw_pmon_mc0_chan0);
+    FREE_PCI(hsw_pmon_mc0_chan1);
+    FREE_PCI(hsw_pmon_mc0_chan2);
+    FREE_PCI(hsw_pmon_mc0_chan3);
+    FREE_PCI(hsw_pmon_mc1_chan0);
+    FREE_PCI(hsw_pmon_mc1_chan1);
+    FREE_PCI(hsw_pmon_mc1_chan2);
+    FREE_PCI(hsw_pmon_mc1_chan3);
+    FREE_PCI(hsw_pmon_irp);
+    FREE_PCI(hsw_pmon_qpi_p0);
+    FREE_PCI(hsw_pmon_qpi_p1);
+    FREE_PCI(hsw_pmon_r2pcie);
+    FREE_PCI(hsw_pmon_r3qpi_l0);
+    FREE_PCI(hsw_pmon_r3qpi_l1);
     free_defaults();
 
     class_destroy(x86_adapt_class);
