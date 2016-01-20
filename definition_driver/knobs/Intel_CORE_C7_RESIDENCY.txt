@@ -7,4 +7,4 @@ MSR
 //#restricted_settings
 readonly
 //#processor_groups
-nehalem, westmere, sandybridge, ivybridge, haswell
+nehalem, westmere, sandybridge, ivybridge, haswell, broadwell

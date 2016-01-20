@@ -7,4 +7,4 @@ MSRNODE
 //#restricted_settings
 readonly
 //#processor_groups
-core2, nehalem, westmere, sandybridge, ivybridge, haswell
+core2, nehalem, westmere, sandybridge, ivybridge, haswell, broadwell
