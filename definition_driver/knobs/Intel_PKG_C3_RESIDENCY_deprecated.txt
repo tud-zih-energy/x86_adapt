@@ -1,0 +1,12 @@
+//#name
+Intel_PKG_C3_RESIDENCY
+//#description
+Value since last reset that this package is in processor-specific C3 states. Count at the same frequency as the TSC. (deprecated, please use the node wide counter)
+//#device
+MSR
+//#register_index
+0x000003f8
+//#restricted_settings
+readonly
+//#processor_groups
+core2, nehalem, westmere, sandybridge, ivybridge, haswell
