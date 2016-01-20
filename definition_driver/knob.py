@@ -17,6 +17,8 @@ class Knob():
     processor_groups=[]
     nda=False
     cpuid=None
+    filename=None
+    override_name=None
     def __init__(self, inputfilename):
         self.name=inputfilename[inputfilename.rfind('/')+1:inputfilename.rfind('.')]
 
@@ -30,12 +32,13 @@ class Knob():
         self.readonly=False
         self.nda=False
         self.cpuid=None
+        self.override_name=self.name
 
         inputfile=open(inputfilename)
         data = list(inputfile)
         for line_nr in range(0,len(data)-1):
             if (data[line_nr].strip()=='//#name'):
-                self.name=data[line_nr+1].strip()
+                self.override_name=data[line_nr+1].strip()
             if (data[line_nr].strip()=='//#description'):
                 self.description=data[line_nr+1].strip()
             if (data[line_nr].strip()=='//#device'):

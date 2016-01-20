@@ -1,3 +1,5 @@
+//#name
+Intel_DCU_IP_Prefetch_Disable
 //#description
 When set to 1, The IP prefetcher is disabled. The default value after reset is 0. BIOS may write ‘1’ to disable this feature. The IP prefetcher is an L1 data cache prefetcher. The IP prefetcher looks for sequential load history to determine whether to prefetch the next expected data into the L1 cache from memory or L2.
 //#device

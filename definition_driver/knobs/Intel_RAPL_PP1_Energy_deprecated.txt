@@ -1,3 +1,5 @@
+//#name
+Intel_RAPL_PP1_Energy
 //#description
 MSR 0x641 which contains RAPL energy information for GPU (deprecated, please use the node wide counter)
 //#device

@@ -1,3 +1,5 @@
+//#name
+Intel_RAPL_Pckg_Energy
 //#description
 MSR 0x611 which contains RAPL energy information for DRAM (deprecated, please use the node wide counter)
 //#device

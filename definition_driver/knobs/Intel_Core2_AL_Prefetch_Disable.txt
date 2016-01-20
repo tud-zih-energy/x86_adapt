@@ -1,3 +1,5 @@
+//#name
+Intel_AL_Prefetch_Disable
 //#description
 When set to 1, the processor fetches the cache line that contains data currently required by the processor; When set to 0, the processor fetches cache lines that comprise a cache line pair
 //#device

@@ -1,3 +1,5 @@
+//#name
+Intel_RAPL_Power_Unit
 //#description
 MSR 0x606 which contains RAPL Power Unit information (deprecated, please use the node wide counter)
 //#device
@@ -9,4 +11,4 @@ MSR
 //#restricted_settings
 readonly
 //#processor_groups
-sandybridge,ivybridge, haswell
+sandybridge,ivybridge, haswell, broadwell

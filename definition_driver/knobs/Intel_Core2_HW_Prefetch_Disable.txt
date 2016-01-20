@@ -1,3 +1,5 @@
+//#name
+Intel_HW_Prefetch_Disable
 //#description
 When set, disables the hardware prefetcher operation on streams of data. When clear (default), enables the prefetch queue. Disabling of the hardware prefetcher may impact processor performance.
 //#device

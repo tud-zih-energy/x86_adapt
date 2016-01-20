@@ -133,7 +133,7 @@ text = text + "static struct knob_entry_definition all_knobs [] = {\n"
 
 for knob in knobs:
     text = text + "\t{\n"
-    text = text + "\t.knob.name=\""+knob.name+"\",\n"
+    text = text + "\t.knob.name=\""+knob.override_name+"\",\n"
     text = text + "\t.knob.description=\""+knob.description+"\",\n"
     text = text + "\t.knob.device="+knob.device+",\n"
     text = text + "\t.knob.register_index="+knob.register_index+",\n"

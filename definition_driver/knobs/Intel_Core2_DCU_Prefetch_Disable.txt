@@ -1,3 +1,5 @@
+//#name
+Intel_DCU_Prefetch_Disable
 //#description
 When set to 1, The DCU L1 data cache prefetcher is disabled. The default value after reset is 0. BIOS may write ‘1’ to disable this feature; The DCU prefetcher is an L1 data cache prefetcher. When the DCU
 prefetcher detects multiple loads from the same line done within a time limit, the DCU prefetcher assumes the next line will be required. The next line is prefetched in to the L1 data cache from memory or L2.
