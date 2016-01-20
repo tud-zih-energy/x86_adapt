@@ -1,7 +1,7 @@
 //#description
 MSR 0x639 which contains RAPL energy information for cores
 //#device
-MSR
+MSRNODE
 //#register_index
 0x639
 //#bit_mask

@@ -1,7 +1,7 @@
 //#description
 MSR 0x606 which contains RAPL Power Unit information
 //#device
-MSR
+MSRNODE
 //#register_index
 0x606
 //#bit_mask

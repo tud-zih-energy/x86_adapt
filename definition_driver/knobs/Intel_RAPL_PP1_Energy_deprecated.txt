@@ -1,7 +1,7 @@
 //#description
-MSR 0x641 which contains RAPL energy information for GPU
+MSR 0x641 which contains RAPL energy information for GPU (deprecated, please use the node wide counter)
 //#device
-MSRNODE
+MSR
 //#register_index
 0x641
 //#bit_mask

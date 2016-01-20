@@ -1,7 +1,7 @@
 //#description
-MSR 0x619 which contains RAPL energy information for DRAM
+MSR 0x619 which contains RAPL energy information for DRAM (deprecated, please use the node wide counter)
 //#device
-MSRNODE
+MSR
 //#register_index
 0x619
 //#bit_mask

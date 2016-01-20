@@ -1,7 +1,7 @@
 //#description
 MSR 0x611 which contains RAPL energy information for DRAM
 //#device
-MSR
+MSRNODE
 //#register_index
 0x611
 //#bit_mask
