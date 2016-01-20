@@ -57,13 +57,9 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
             goto fail; \
         } \
         for_each_node(i) \
+        { \
             NAME [i] = pci_get_bus_and_slot(get_uncore_bus_id(i), PCI_DEVFN(NUM,NUM2)); \
-            if ( NAME [i] == NULL) \
-            { \
-                err = -ENODEV; \
-                printk(KERN_ERR "Failed to find uncore device on node %d\n",i); \
-                goto fail; \
-            } \
+        } \
     } while (0)
 
 
