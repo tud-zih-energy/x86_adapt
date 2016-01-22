@@ -484,6 +484,7 @@ static inline int read_defaults_cpu(int cpu)
         for (knob=1;knob<active_knobs_cpu_length;knob++)
         {
              ret = read_setting(cpu,active_knobs_cpu[knob],&defaults_cpu[cpu][knob-1]);
+             defaults_cpu[cpu][knob-1] = get_setting_from_register_reading(defaults_cpu[cpu][knob-1], active_knobs_cpu[knob].bitmask);
              if (ret)
              {
                  kfree(defaults_cpu[cpu]);
@@ -510,6 +511,7 @@ static inline int read_defaults(void)
         for (knob=1;knob<active_knobs_node_length;knob++)
         {
              ret = read_setting(node,active_knobs_node[knob],&defaults_node[node][knob-1]);
+             defaults_node[node][knob-1] = get_setting_from_register_reading(defaults_node[node][knob-1], active_knobs_node[knob].bitmask);
              if (ret)
                  return ret;
         }
@@ -897,33 +899,33 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
             case MSRNODE:
             {
                 const struct cpumask * mask = cpumask_of_node(dev_nr);
-                const struct cpumask * online = cpumask_of_node(dev_nr);
+                const struct cpumask * online = cpu_online_mask;
                 struct cpumask node_online;
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
                 {
-                    int cpu;
-                    /* get the first of the online cpus */
-                    /* check whether this tasks cpu is on node */
-                    struct thread_info *ti =task_thread_info(current);
-                    cpu=ti->cpu;
-                    /* if this task is already on the node, use this tasks cpu */
-                    if (cpumask_test_cpu(cpu,&node_online))
+                    int cpu=nr_cpu_ids;
+                    /* try for all online cpus on the node */
+                    do
                     {
-                        err = wrmsr_on_cpu(cpu, knob.register_index,l, h);
-                    }
-                    else
-                    {
+                        /* get the first of the online cpus */
                         cpu=cpumask_first(&node_online);
                         /* any online? (2nd check to be really sure) */
                         if (cpu<nr_cpu_ids)
                         {
                             err = wrmsr_on_cpu(cpu, knob.register_index,l, h);
+                            if (!err)
+                            {
+                                /* we could write*/
+                                break;
+                            } /* if err try on next cpu and removing first from list */
+                            cpumask_clear_cpu(cpu, node_online);
                         }
-                        /* none online :( */
-                        else
-                            return -ENXIO;
+                        
                     }
+                    while (cpu < nr_cpu_ids);
+                    if (cpu >= nr_cpu_ids)
+                        return -ENXIO;
                 }
                 else
                     return -ENXIO;
@@ -1041,6 +1043,9 @@ static ssize_t do_write(struct file * file, const char * buf,
             return -ENXIO;
     } 
     
+#ifdef X86A_DEBUG
+    printk("Setting item %s on device type %d to (as dec) %d %d / (as hex) %x %x\n")
+#endif
 
     if ((*ppos < entries_length)) {
         u64 setting = 0;
