@@ -281,6 +281,8 @@ static struct knob_entry * active_knobs_cpu = NULL;
 static u64 ** defaults_cpu = NULL;
 
 static int read_setting(int dev_nr, struct knob_entry knob,u64 * setting) ;
+__always_inline static u64 get_setting_from_register_reading(u64 register_reading, u64 bitmask) ;
+
 
 /* This function gives you the bus id for uncore components of a NUMA node in sandy bridge ep processors */
 static int get_uncore_bus_id(int node_id)
@@ -904,28 +906,28 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
                 {
-                    int cpu=nr_cpu_ids;
-                    /* try for all online cpus on the node */
-                    do
+                    int cpu;
+                    /* get the first of the online cpus */
+                    /* check whether this tasks cpu is on node */
+                    struct thread_info *ti =task_thread_info(current);
+                    cpu=ti->cpu;
+                    /* if this task is already on the node, use this tasks cpu */
+                    if (cpumask_test_cpu(cpu,&node_online))
                     {
-                        /* get the first of the online cpus */
+                        err = wrmsr_on_cpu(cpu, knob.register_index,l, h);
+                    }
+                    else
+                    {
                         cpu=cpumask_first(&node_online);
                         /* any online? (2nd check to be really sure) */
                         if (cpu<nr_cpu_ids)
                         {
                             err = wrmsr_on_cpu(cpu, knob.register_index,l, h);
-                            if (!err)
-                            {
-                                /* we could write*/
-                                break;
-                            } /* if err try on next cpu and removing first from list */
-                            cpumask_clear_cpu(cpu, node_online);
                         }
-                        
+                        /* none online :( */
+                        else
+                            return -ENXIO;
                     }
-                    while (cpu < nr_cpu_ids);
-                    if (cpu >= nr_cpu_ids)
-                        return -ENXIO;
                 }
                 else
                     return -ENXIO;
