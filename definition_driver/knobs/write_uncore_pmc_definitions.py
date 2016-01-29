@@ -225,7 +225,7 @@ for i in range(2):
 	boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","HA"+str(i),"Home Agent "+str(i),"HSW_PMON_HA"+str(i), nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 # Memory Controller
-for channel in range(3):
+for channel in range(4):
 	for mc in range(2):
 		boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","IMC"+str(mc)+"_CHAN"+str(channel),"Memory Controller "+str(mc)+" Channel "+str(channel),"HSW_PMON_MC"+str(mc)+"_CHAN"+str(channel), nr_ctr=4, has_status=True, has_ctl=True, nr_fixed=1, ctl_bitmask="0x103", status_bitmask="0x1F",eventsel_bitmask="0xFFD6FFFF",fixed_ctl_bitmask="0xD80000", ctr_bitmask="0xFFFFFFFFFFFF", fixed_ctr_bitmask="0xFFFFFFFFFFFF" ))
 
