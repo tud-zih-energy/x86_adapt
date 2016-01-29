@@ -239,7 +239,8 @@ boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","QPI0","Quick Path Inte
 boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R2PCIe","Ring to PCIe","HSW_PMON_R2PCIE", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 # R3QPI (R3QPI L1 only on haswell ex)
-boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R3QPI0","Ring to QPI Interface 0","HSW_PMON_R3QPI_L0", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R3QPI0_Link_0","Ring to QPI Interface Link 0","HSW_PMON_R3QPI_L0", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R3QPI0_Link_1","Ring to QPI Interface Link 1","HSW_PMON_R3QPI_L1", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
 
 
 #Sandy Bridge
