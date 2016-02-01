@@ -2,7 +2,7 @@
 .ad l
 .nh
 .SH NAME
-x86a_write.c \- Application to set the value of x86_adapt configuration items on a system\&.  
+x86a_write \- Application to set the value of x86_adapt configuration items on a system\&.  
 
 .SH SYNOPSIS
 x86a_write [ x86a_write-ARGS \&.\&.\&.]
@@ -28,11 +28,11 @@ x86a_write-ARGS:
 .PP
 .nf
 .SH EXAMPLES
-x86a_write -V Intel_Energy_Performance_Bias -o 0 # sets the item "Intel_Energy_Performance_Bias" on all cpus to 0
+x86a_write -i Intel_Energy_Performance_Bias -o V # sets the item "Intel_Energy_Performance_Bias" on all cpus to 0
 .PP 
-x86a_write -c 2 -V Intel_Energy_Performance_Bias -o 0 # sets the item "Intel_Energy_Performance_Bias" on cpu 2 to 0
+x86a_write -c 2 -i Intel_Energy_Performance_Bias -o V # sets the item "Intel_Energy_Performance_Bias" on cpu 2 to 0
 .PP 
-x86a_write -c 2 -V Intel_Energy_Performance_Bias -H -o F # sets the item "Intel_Energy_Performance_Bias" on cpu 2 to 15 (F in hexadecimal)
+x86a_write -c 2 -i Intel_Energy_Performance_Bias -H -V F # sets the item "Intel_Energy_Performance_Bias" on cpu 2 to 15 (F in hexadecimal)
 .PP
 .SH SEE ALSO
 .PP

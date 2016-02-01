@@ -10,13 +10,13 @@ x86a_read [ x86a_read-ARGS \&.\&.\&.]
 Invoking the x86a_read tool prints a list of knobs: 
 .PP
 .nf
-Item 0: Intel_Clock_Modulation_Value
+Item 1: Intel_Clock_Modulation
 ----------------
-Item 1: Intel_DCU_Prefetch_Disable
+Item 2: Intel_DCU_Prefetch_Disable
 ----------------
-Item 2: Intel_Enhanced_SpeedStep
+Item 3: Intel_Enhanced_SpeedStep
 ----------------
-Item 3: Intel_Target_PState
+Item 4: Intel_Target_PState
 [\&.\&.\&.]
 
 .fi
@@ -47,7 +47,7 @@ x86a_read -c 0 # prints all items and the readings for CPU 0
 .PP 
 x86a_read -n 0 -c 0 # prints all items and the readings for node 0
 .PP 
-x86a_read -n 0 -c 0 -X # prints all items and the readings for node 0 in hexadecimal
+x86a_read -n 0 -c 0 -H # prints all items and the readings for node 0 in hexadecimal
 .PP 
 x86a_read -i Intel_Clock_Modulation_Value -c 0 -X # prints the item Intel_Clock_Modulation_Value and its reading for CPU 0 in hexadecimal
 .fi
