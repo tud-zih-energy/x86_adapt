@@ -694,7 +694,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
             case MSRNODE:
             {
                 const struct cpumask * mask = cpumask_of_node(dev_nr);
-                const struct cpumask * online = cpumask_of_node(dev_nr);
+                const struct cpumask * online = cpu_online_mask;
                 struct cpumask node_online;
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
