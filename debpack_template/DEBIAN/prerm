@@ -1,8 +1,12 @@
 #!/bin/sh
 
 #disable autoload
-sed -i 's/x86_adapt_driver//g' /etc/modules
+sed -i '/x86_adapt_defs/d' /etc/modules
+sed -i '/x86_adapt_driver/d' /etc/modules
 
 #remove from dkms
-dkms uninstall -m x86_adapt_driver/###VERSION###
-dkms remove -m x86_adapt_driver/###VERSION### --all
+dkms uninstall -m x86_adapt_driver -v ###VERSION###
+dkms uninstall -m x86_adapt_defs -v ###VERSION###
+
+dkms remove -m x86_adapt_driver -v ###VERSION### --all
+dkms remove -m x86_adapt_defs -v ###VERSION### --all

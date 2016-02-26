@@ -5,5 +5,5 @@ priority: extra
 depends: build-essential, dkms, python
 architecture: amd64
 maintainer: Michael Werner <michael.werner3@tu-dresden.de> 
-homepage: www.zih.tu-dresden.de
+homepage: https://github.com/tud-zih-energy/x86_adapt
 description: x86 adapt driver

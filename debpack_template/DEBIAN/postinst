@@ -1,12 +1,16 @@
 #!/bin/sh
 
-#create template
-cd /usr/src/x86_adapt_driver-###VERSION###
-./prepare.py
-
 #add to dkms
-dkms add -m x86_adapt_driver/###VERSION###
-dkms install -m x86_adapt_driver/###VERSION###
+sudo dkms add -m x86_adapt_defs -v ###VERSION###
+sudo dkms add -m x86_adapt_driver -v ###VERSION###
+
+sudo dkms build -m x86_adapt_defs -v ###VERSION###
+sudo dkms build -m x86_adapt_driver -v ###VERSION###
+
+
+sudo dkms install -m x86_adapt_defs -v ###VERSION###
+sudo dkms install -m x86_adapt_driver -v ###VERSION###
 
 #enable autoload
+echo "x86_adapt_defs" >> /etc/modules
 echo "x86_adapt_driver" >> /etc/modules
