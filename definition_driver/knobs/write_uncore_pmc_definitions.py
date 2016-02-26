@@ -41,7 +41,7 @@ class HaswellPciBox:
 		self.config_bitmask=config_bitmask
 
 	def print_one(self,register,name,descr,bitmask):
-		print "write file "+self.prefix+self.name+"_PMON_"+name+".txt"
+		print("write file {}{}_PMON_.txt".format(self.prefix, self.name, name))
 		f=open(self.prefix+self.name+"_PMON_"+name+".txt","w")
 		text=""
 		text=text+"//#name\n"+self.name+"_PMON_"+name+"\n"
@@ -77,7 +77,6 @@ class HaswellPciBox:
 			self.print_one(248, "STATUS", "Status",self.status_bitmask)
 
 class Box:
-
 	prefix=None
 	processor_group=None
 	name=None
@@ -132,7 +131,7 @@ class Box:
 		self.config_bitmask=config_bitmask
 
 	def print_one(self,register,name,descr,bitmask):
-		print "write file "+self.prefix+self.name+"_PMON_"+name+".txt"
+		print("write file {}{}_PMON_.txt".format(self.prefix, self.name, name))
 		f=open(self.prefix+self.name+"_PMON_"+name+".txt","w")
 		text=""
 		text=text+"//#name\n"+self.name+"_PMON_"+name+"\n"
