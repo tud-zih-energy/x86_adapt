@@ -41,8 +41,9 @@ class HaswellPciBox:
 		self.config_bitmask=config_bitmask
 
 	def print_one(self,register,name,descr,bitmask):
-		print("write file {}{}_PMON_.txt".format(self.prefix, self.name, name))
-		f=open(self.prefix+self.name+"_PMON_"+name+".txt","w")
+		file_name = "{}{}_PMON_{}.txt".format(self.prefix, self.name, name)
+		print("write file", file_name)
+		f=open(file_name,"w")
 		text=""
 		text=text+"//#name\n"+self.name+"_PMON_"+name+"\n"
 		text=text+"//#description\n"+self.description+" "+descr
@@ -131,8 +132,9 @@ class Box:
 		self.config_bitmask=config_bitmask
 
 	def print_one(self,register,name,descr,bitmask):
-		print("write file {}{}_PMON_.txt".format(self.prefix, self.name, name))
-		f=open(self.prefix+self.name+"_PMON_"+name+".txt","w")
+		file_name = "{}{}_PMON_{}.txt".format(self.prefix, self.name, name)
+		print("write file", file_name)
+		f=open(file_name,"w")
 		text=""
 		text=text+"//#name\n"+self.name+"_PMON_"+name+"\n"
 		text=text+"//#description\n"+self.description+" "+descr+"\n"
