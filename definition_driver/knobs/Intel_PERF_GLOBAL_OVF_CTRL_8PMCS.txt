@@ -12,4 +12,3 @@ MSR
 intel
 //#CPUID
 0x0a,( ( (eax&0xFF) > 0 ) && ( (eax&0xFF) <= 3 ) && ( ((eax>>8)&0xff) > 7 )  && ((edx&0xf) > 2))
-

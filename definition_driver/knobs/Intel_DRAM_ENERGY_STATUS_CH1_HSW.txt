@@ -11,4 +11,4 @@ HSW_PCU2
 //#restricted_settings
 readonly
 //#processor_groups
-haswell_ep
+haswell_ep,broadwell_ep

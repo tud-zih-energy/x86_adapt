@@ -11,4 +11,4 @@ MSR
 //#restricted_settings
 readonly
 //#processor_groups
-sandybridge,ivybridge, haswell, broadwell
+sandybridge,ivybridge,haswell,broadwell,skylake

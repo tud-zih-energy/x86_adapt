@@ -209,39 +209,39 @@ class Box:
 
 # Haswell EP
 boxes=[]
-boxes.append(Box("Intel_Haswell_","haswell_ep","GLOBAL", "Global",0x700,has_config=True,has_status=True,ctl_bitmask="0xE003FFFF",status_bitmask="0xC3FF00007",config_bitmask="0x1F"))
+boxes.append(Box("Intel_Haswell_","haswell_ep,broadwell_ep","GLOBAL", "Global",0x700,has_config=True,has_status=True,ctl_bitmask="0xE003FFFF",status_bitmask="0xC3FF00007",config_bitmask="0x1F"))
 # U Box
-boxes.append(Box("Intel_Haswell_","haswell_ep","U", "U-box",0x703,has_ctl=False,nr_fixed=1,nr_ctr=2,skip_before_status=1,has_status=True, status_bitmask="0x3",eventsel_bitmask="0x1FD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF",fixed_ctl_bitmask="0x500000",fixed_ctr_bitmask="0xFFFFFFFFFFFF"))
+boxes.append(Box("Intel_Haswell_","haswell_ep,broadwell_ep","U", "U-box",0x703,has_ctl=False,nr_fixed=1,nr_ctr=2,skip_before_status=1,has_status=True, status_bitmask="0x3",eventsel_bitmask="0x1FD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF",fixed_ctl_bitmask="0x500000",fixed_ctr_bitmask="0xFFFFFFFFFFFF"))
 # PCU
-boxes.append(Box("Intel_Haswell_","haswell_ep","PCU", "Power control Unit", 0x710, nr_ctr=4, nr_filter=1, has_status=True, ctl_bitmask="0x103", status_bitmask="0xF", eventsel_bitmask="0xDFF6C0FF", ctr_bitmask="0xFFFFFFFFFFFF",filter_bitmasks="0xFFFFFFFF"))
+boxes.append(Box("Intel_Haswell_","haswell_ep,broadwell_ep","PCU", "Power control Unit", 0x710, nr_ctr=4, nr_filter=1, has_status=True, ctl_bitmask="0x103", status_bitmask="0xF", eventsel_bitmask="0xDFF6C0FF", ctr_bitmask="0xFFFFFFFFFFFF",filter_bitmasks="0xFFFFFFFF"))
 # s boxes
 for i in range(4):
-	boxes.append(Box("Intel_Haswell_","haswell_ep","S"+str(i), "S-box "+str(i),0x720+i*0xa,nr_ctr=4,has_status=True,ctl_bitmask="0x103",status_bitmask="0xF",eventsel_bitmask="0xFFCEFFFF", ctr_bitmask="0xFFFFFFFFFFFF"))
+	boxes.append(Box("Intel_Haswell_","haswell_ep,broadwell_ep","S"+str(i), "S-box "+str(i),0x720+i*0xa,nr_ctr=4,has_status=True,ctl_bitmask="0x103",status_bitmask="0xF",eventsel_bitmask="0xFFCEFFFF", ctr_bitmask="0xFFFFFFFFFFFF"))
 # c boxes
 for i in range(18):
-	boxes.append(Box("Intel_Haswell_","haswell_ep","C"+str(i), "C-box "+str(i), 0xe00+i*0x10, nr_ctr=4, nr_filter=2, has_status=True, ctl_bitmask="0x103", status_bitmask="0xF", eventsel_bitmask="0xFFCEFFFF", ctr_bitmask="0xFFFFFFFFFFFF", filter_bitmasks=["0xFE003F","0xDFF0FFFF"]))
+	boxes.append(Box("Intel_Haswell_","haswell_ep,broadwell_ep","C"+str(i), "C-box "+str(i), 0xe00+i*0x10, nr_ctr=4, nr_filter=2, has_status=True, ctl_bitmask="0x103", status_bitmask="0xF", eventsel_bitmask="0xFFCEFFFF", ctr_bitmask="0xFFFFFFFFFFFF", filter_bitmasks=["0xFE003F","0xDFF0FFFF"]))
 
 # Home Agent (todo: filters :( )
 for i in range(2):
-	boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","HA"+str(i),"Home Agent "+str(i),"HSW_PMON_HA"+str(i), nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
+	boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","HA"+str(i),"Home Agent "+str(i),"HSW_PMON_HA"+str(i), nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 # Memory Controller
 for channel in range(4):
 	for mc in range(2):
-		boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","IMC"+str(mc)+"_CHAN"+str(channel),"Memory Controller "+str(mc)+" Channel "+str(channel),"HSW_PMON_MC"+str(mc)+"_CHAN"+str(channel), nr_ctr=4, has_status=True, has_ctl=True, nr_fixed=1, ctl_bitmask="0x103", status_bitmask="0x1F",eventsel_bitmask="0xFFD6FFFF",fixed_ctl_bitmask="0xD80000", ctr_bitmask="0xFFFFFFFFFFFF", fixed_ctr_bitmask="0xFFFFFFFFFFFF" ))
+		boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","IMC"+str(mc)+"_CHAN"+str(channel),"Memory Controller "+str(mc)+" Channel "+str(channel),"HSW_PMON_MC"+str(mc)+"_CHAN"+str(channel), nr_ctr=4, has_status=True, has_ctl=True, nr_fixed=1, ctl_bitmask="0x103", status_bitmask="0x1F",eventsel_bitmask="0xFFD6FFFF",fixed_ctl_bitmask="0xD80000", ctr_bitmask="0xFFFFFFFFFFFF", fixed_ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 # IRP
-boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","IRP0","IRP 0","HSW_PMON_IRP", nr_ctr=2, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFC6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","IRP0","IRP 0","HSW_PMON_IRP", nr_ctr=2, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFC6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 # QPI (Todo: filters and stuff, QPI1 on haswell ex)
-boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","QPI0","Quick Path Interface 0","HSW_PMON_QPI_P0", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","QPI0","Quick Path Interface 0","HSW_PMON_QPI_P0", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 #R2PCI
-boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R2PCIe","Ring to PCIe","HSW_PMON_R2PCIE", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","R2PCIe","Ring to PCIe","HSW_PMON_R2PCIE", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 # R3QPI (R3QPI L1 only on haswell ex)
-boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R3QPI0_Link_0","Ring to QPI Interface Link 0","HSW_PMON_R3QPI_L0", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
-boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep","R3QPI0_Link_1","Ring to QPI Interface Link 1","HSW_PMON_R3QPI_L1", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","R3QPI0_Link_0","Ring to QPI Interface Link 0","HSW_PMON_R3QPI_L0", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","R3QPI0_Link_1","Ring to QPI Interface Link 1","HSW_PMON_R3QPI_L1", nr_ctr=3, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0x7",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFF" ))
 
 
 #Sandy Bridge

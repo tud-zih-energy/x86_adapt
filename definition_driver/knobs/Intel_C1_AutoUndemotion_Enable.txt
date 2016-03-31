@@ -7,4 +7,4 @@ MSR
 //#bit_mask
 (1ULL<<28)
 //#processor_groups
-sandybridge, ivybridge, haswell
+sandybridge,ivybridge,haswell,broadwell,skylake

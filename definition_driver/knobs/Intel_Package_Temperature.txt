@@ -9,4 +9,4 @@ SB_PCU0
 //#restricted_settings
 readonly
 //#processor_groups
-sandybridge,ivybridge,haswell_he
+sandybridge,ivybridge,haswell_he,broadwell_he,skylake_he
