@@ -235,6 +235,7 @@ boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","IRP0","IR
 
 # QPI (Todo: filters and stuff, QPI1 on haswell ex)
 boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","QPI0","Quick Path Interface 0","HSW_PMON_QPI_P0", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
+boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","QPI1","Quick Path Interface 1","HSW_PMON_QPI_P1", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFF6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
 
 #R2PCI
 boxes.append(HaswellPciBox("Intel_Haswell_","haswell_ep,broadwell_ep","R2PCIe","Ring to PCIe","HSW_PMON_R2PCIE", nr_ctr=4, has_status=True, has_ctl=True, ctl_bitmask="0x103", status_bitmask="0xF",eventsel_bitmask="0xFFD6FFFF",ctr_bitmask="0xFFFFFFFFFFFF" ))
