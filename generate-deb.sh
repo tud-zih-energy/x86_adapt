@@ -29,14 +29,14 @@ cd -
 #create definitions driver source
 ./definition_driver/prepare.py debpack/usr/src/x86_adapt_defs-template/src definition_driver/
 #copy header
-cp definition_driver/x86_adapt_defs.h debpack/usr/src/x86_adapt_defs-template/definition_driver/
+cp --parents definition_driver/x86_adapt_defs.h debpack/usr/src/x86_adapt_defs-template/
 
 ## x86_adapt_driver
 #copy files
 cp -r driver/. debpack/usr/src/x86_adapt_driver-template/src
 # TODO: maybe change make file
 ./definition_driver/prepare.py debpack/usr/src/x86_adapt_driver-template/definition_driver definition_driver/
-cp definition_driver/x86_adapt_defs.h debpack/usr/src/x86_adapt_driver-template/definition_driver/
+cp --parents definition_driver/x86_adapt_defs.h debpack/usr/src/x86_adapt_driver-template/
 
 #rename dkms directory
 mv debpack/usr/src/x86_adapt_defs-template/ debpack/usr/src/x86_adapt_defs-$REVISION
