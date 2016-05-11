@@ -1,0 +1,4 @@
+KERNEL=="cpu_[0-9]*", SUBSYSTEM=="x86_adapt", MODE="0666"
+KERNEL=="cpu_all", SUBSYSTEM=="x86_adapt", MODE="0666"
+KERNEL=="node_[0-9]*", SUBSYSTEM=="x86_adapt", MODE="0666"
+KERNEL=="node_all", SUBSYSTEM=="x86_adapt", MODE="0666"
