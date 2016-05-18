@@ -22,13 +22,13 @@
  * @code
  * Usage: x86a_read [ x86a_read-ARGS ...]
  * x86a_read-ARGS:
- * 	 -h --help: print this help
- * 	 -H --hex: print readings in hexadecimal form
- * 	 -n --node: print node options instead of CPU options
- * 	 -c --cpu: Read item(s) from this CPU (default=all)
- * 		If -n is set, read item(s) from this node (default=all).
- * 	 -i --item: Read this item (default=all)
- * 	 -v --verbose: print more information
+ *      -h --help: print this help
+ *      -H --hex: print readings in hexadecimal form
+ *      -n --node: print node options instead of CPU options
+ *      -c --cpu: read item(s) from this CPU (default=all)
+ *                if -n is set, read item(s) from this node (default=all).
+ *      -i --item: Read this item (default=all)
+ *      -v --verbose: print more information
  * @endcode
  * Details:
  * The term "node" refers to a node in the Linux context, which is a NUMA node (e.g., a physical processor).
@@ -68,8 +68,8 @@ static void print_help(char ** argv)
   fprintf(stderr, "\t -h --help: print this help\n");
   fprintf(stderr, "\t -H --hex: print readings in hexadecimal form\n");
   fprintf(stderr, "\t -n --node: print node options instead of CPU options\n");
-  fprintf(stderr, "\t -c --cpu: Read item(s) from this CPU (default=all)\n"
-                     "\t\tIf -n is set, read item(s) from this node (default=all).\n");
+  fprintf(stderr, "\t -c --cpu: read item(s) from this CPU (default=all)\n"
+                  "\t           if -n is set, read item(s) from this node (default=all).\n");
   fprintf(stderr, "\t -i --item: Read this item (default=all)\n");
   fprintf(stderr, "\t -v --verbose: print more information\n");
   fprintf(stderr, "\n");
