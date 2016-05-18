@@ -18,6 +18,7 @@
 
 struct fd_client_count {
 	int fd;
+    int fd_ro;
 	int clients;
     pthread_mutex_t mutex;
 }__attribute__((aligned(64)));
@@ -185,6 +186,7 @@ int x86_adapt_init(void)
     fds[X86_ADAPT_CPU]=calloc(fds_length[X86_ADAPT_CPU],sizeof(struct fd_client_count));
     if (!fds[X86_ADAPT_CPU])
         return -ENOMEM;
+
     fds[X86_ADAPT_DIE]=calloc(fds_length[X86_ADAPT_DIE],sizeof(struct fd_client_count));
     if (!fds[X86_ADAPT_DIE])
         return -ENOMEM;
@@ -192,8 +194,11 @@ int x86_adapt_init(void)
     /* init local mutexes */
     for(i=0;i<2;i++) {
         pthread_mutex_init(&fd_all[i].mutex, NULL);
-        for(j=0;j<fds_length[i];j++)
+        for(j=0;j<fds_length[i];j++) {
+            fds[i][j].fd = -1;
+            fds[i][j].fd_ro = -1;
             pthread_mutex_init(&fds[i][j].mutex, NULL);
+        }
     }
 
 	initialized=1;
@@ -204,67 +209,87 @@ int x86_adapt_init(void)
 /* returns file descriptor for /dev/x86_adapt/<cpu|node>/<nr>*/
 int x86_adapt_get_device(x86_adapt_device_type device_type, uint32_t nr)
 {
+    struct fd_client_count* ccp;
 	if (!initialized)
         return -EPERM;
 	if (device_type > 1)
         return -ENXIO;
 	if (nr >= fds_length[device_type])
         return -ENXIO;
-	/* are we the first client? */
-    pthread_mutex_lock(&fds[device_type][nr].mutex);
-	if (fds[device_type][nr].clients==0) {
+
+    ccp = &fds[device_type][nr];
+    pthread_mutex_lock(&(ccp->mutex));
+
+	if (ccp->fd < 0) {
 		/* open the fd */
 		char buffer[256];
 		sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
-		fds[device_type][nr].fd=open(buffer, O_RDWR);
+		ccp->fd = open(buffer, O_RDWR);
 	}
-	/* increase nr of clients */
-	fds[device_type][nr].clients++;
-  pthread_mutex_unlock(&fds[device_type][nr].mutex);
-	return fds[device_type][nr].fd;
+    if (ccp->fd >= 0) {
+        /* increase nr of clients, but we don't assume a client to call put if he received an error. */
+        ccp->clients++;
+    }
+    pthread_mutex_unlock(&(ccp->mutex));
+    return ccp->fd;
 }
 
-/* returns file descriptor for /dev/x86_adapt/<cpu|node>/<nr> in read only mode*/
+/* returns file descriptor for /dev/x86_adapt/<cpu|node>/<nr>*/
 int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr)
 {
-  if (!initialized)
+    struct fd_client_count* ccp;
+	if (!initialized)
         return -EPERM;
-  if (device_type > 1)
+	if (device_type > 1)
         return -ENXIO;
-  if (nr >= fds_length[device_type])
+	if (nr >= fds_length[device_type])
         return -ENXIO;
-  /* are we the first client? */
-    pthread_mutex_lock(&fds[device_type][nr].mutex);
-  if (fds[device_type][nr].clients==0) {
-    /* open the fd */
-    char buffer[256];
-    sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
-    fds[device_type][nr].fd=open(buffer, O_RDONLY);
-  }
-  /* increase nr of clients */
-  fds[device_type][nr].clients++;
-  pthread_mutex_unlock(&fds[device_type][nr].mutex);
-  return fds[device_type][nr].fd;
+
+    ccp = &fds[device_type][nr];
+    pthread_mutex_lock(&(ccp->mutex));
+
+	if (ccp->fd_ro < 0) {
+		/* open the fd */
+		char buffer[256];
+		sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
+		ccp->fd_ro = open(buffer, O_RDONLY);
+	}
+    if (ccp->fd_ro >= 0) {
+        /* increase nr of clients, but we don't assume a client to call put if he received an error. */
+        ccp->clients++;
+    }
+    pthread_mutex_unlock(&(ccp->mutex));
+    return ccp->fd_ro;
 }
 
 /* closes file descriptor */
 int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr)
 {
+    struct fd_client_count* ccp;
 	if (!initialized)
         return -EPERM;
 	if (device_type > 1)
         return -ENXIO;
 	if (nr >= fds_length[device_type])
         return -ENXIO;
-    pthread_mutex_lock(&fds[device_type][nr].mutex);
+
+    ccp = &fds[device_type][nr];
+    pthread_mutex_lock(&(ccp->mutex));
+
 	/* are we the last client? */
-	if (fds[device_type][nr].clients==1) {
-		/* close the fd */
-		close(fds[device_type][nr].fd);
+	if (ccp->clients == 1) {
+        if (ccp->fd >= 0) {
+            close(ccp->fd);
+            ccp->fd = -1;
+        }
+        if (ccp->fd_ro >= 0) {
+            close(ccp->fd_ro);
+            ccp->fd_ro = -1;
+        }
 	}
-	/* decrease nr of clients */
-	fds[device_type][nr].clients--;
-    pthread_mutex_unlock(&fds[device_type][nr].mutex);
+
+	ccp->clients--;
+    pthread_mutex_unlock(&(ccp->mutex));
 	return 0;
 }
 
