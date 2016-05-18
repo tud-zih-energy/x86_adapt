@@ -17,9 +17,9 @@
 #include <x86_adapt.h>
 
 struct fd_client_count {
-	int fd;
+    int fd;
     int fd_ro;
-	int clients;
+    int clients;
     pthread_mutex_t mutex;
 }__attribute__((aligned(64)));
 
@@ -37,61 +37,61 @@ static int initialized=0;
 /* gets the configuration for each avaible x86_adapt configuration item */
 static int get_configuration_items(int fd, struct x86_adapt_configuration_item ** entries)
 {
-	int32_t size_read;
-	ssize_t bytes_read;
-	char * data;
-	char * read_data;
-	int entries_length=0;
-	/* read size to read */
-	bytes_read = pread(fd, &size_read, 4, 0);
-	if (bytes_read!=4) {
-		fprintf(stderr, "ERROR\n");
-		fprintf(stderr, "x86_adapt: Wrong definition size: %zi\n", bytes_read);
-		close(fd);
-		return -EIO;
-	}
+    int32_t size_read;
+    ssize_t bytes_read;
+    char * data;
+    char * read_data;
+    int entries_length=0;
+    /* read size to read */
+    bytes_read = pread(fd, &size_read, 4, 0);
+    if (bytes_read!=4) {
+        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "x86_adapt: Wrong definition size: %zi\n", bytes_read);
+        close(fd);
+        return -EIO;
+    }
     data = alloca(size_read * sizeof(char));
-	bytes_read=pread(fd,data,size_read,0);
-	if (bytes_read < 0 || (unsigned int)bytes_read!=size_read) {
-		fprintf(stderr, "ERROR\n");
-		fprintf(stderr, "x86_adapt: Error reading definitions: %zi %i!\n",bytes_read, size_read);
-		close(fd);
-		return -EIO;
-	}
-	read_data=data;
-	read_data+=4;
-	while (read_data<bytes_read+data) {
+    bytes_read=pread(fd,data,size_read,0);
+    if (bytes_read < 0 || (unsigned int)bytes_read!=size_read) {
+        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "x86_adapt: Error reading definitions: %zi %i!\n",bytes_read, size_read);
+        close(fd);
+        return -EIO;
+    }
+    read_data=data;
+    read_data+=4;
+    while (read_data<bytes_read+data) {
         int length, name_length, descr_length;
         char *name, *descr;
-		/* skip 4 byte id */
-		read_data+=4;
-		/* 1 byte length */
-		 length=read_data[0];
-		read_data++;
-		/* 4 byte name_length */
-		 name_length=((int *)read_data)[0];
-		read_data+=4;
-		/* name_length byte name */
-		name=strndup(read_data,name_length);
-		read_data+=name_length;
-		/* 4 byte descr. length */
-		descr_length=((int *)read_data)[0];
-		read_data+=4;
-		/* descr_length byte descr. */
-		descr=strndup(read_data,descr_length);
-		read_data+=descr_length;
-		*entries=realloc(*entries,sizeof(struct x86_adapt_configuration_item)*(entries_length+1));
-		if (*entries==NULL) {
+        /* skip 4 byte id */
+        read_data+=4;
+        /* 1 byte length */
+         length=read_data[0];
+        read_data++;
+        /* 4 byte name_length */
+         name_length=((int *)read_data)[0];
+        read_data+=4;
+        /* name_length byte name */
+        name=strndup(read_data,name_length);
+        read_data+=name_length;
+        /* 4 byte descr. length */
+        descr_length=((int *)read_data)[0];
+        read_data+=4;
+        /* descr_length byte descr. */
+        descr=strndup(read_data,descr_length);
+        read_data+=descr_length;
+        *entries=realloc(*entries,sizeof(struct x86_adapt_configuration_item)*(entries_length+1));
+        if (*entries==NULL) {
             fprintf(stderr, "ERROR\n");
             fprintf(stderr, "x86_adapt: Failed to realloc memory for x86_adapt configuration items\n");
-			exit(-1);
+            exit(-1);
         }
-		(*entries)[entries_length].name=name;
-		(*entries)[entries_length].description=descr;
-		(*entries)[entries_length].length=length;
-		entries_length++;
-	}
-	return entries_length;
+        (*entries)[entries_length].name=name;
+        (*entries)[entries_length].description=descr;
+        (*entries)[entries_length].length=length;
+        entries_length++;
+    }
+    return entries_length;
 }
 
 /* gets the of avaible cpus or dies */
@@ -147,29 +147,29 @@ int x86_adapt_init(void)
         pthread_mutex_unlock(&init_mutex);
         return 0;
     }
-	/* initialize the configuration_items */
-	config_items=calloc(2,(sizeof(void*)));
+    /* initialize the configuration_items */
+    config_items=calloc(2,(sizeof(void*)));
     if(!config_items)
         return -ENOMEM;
-	fd = open("/dev/x86_adapt/cpu/definitions", O_RDONLY);
-	if (fd < 0) {
-		fprintf(stderr, "ERROR\n");
-		fprintf(stderr, "x86_adapt: failed to open '/dev/x86_adapt/cpu/definitions': %i!\n",fd);
-		return -EIO;
-	}
+    fd = open("/dev/x86_adapt/cpu/definitions", O_RDONLY);
+    if (fd < 0) {
+        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "x86_adapt: failed to open '/dev/x86_adapt/cpu/definitions': %i!\n",fd);
+        return -EIO;
+    }
     config_items_length[X86_ADAPT_CPU]=get_configuration_items(fd, &(config_items[X86_ADAPT_CPU]));
-	close(fd);
-	/* initialize the configuration_items */
-	fd = open("/dev/x86_adapt/node/definitions", O_RDONLY);
-	if (fd < 0) {
-		fprintf(stderr, "ERROR\n");
-		fprintf(stderr, "x86_adapt: failed to open '/dev/x86_adapt/node/definitions': %i!\n",fd);
-		/* why do the close here if the open failed? */
-		close(fd);
-		return -EIO;
-	}
+    close(fd);
+    /* initialize the configuration_items */
+    fd = open("/dev/x86_adapt/node/definitions", O_RDONLY);
+    if (fd < 0) {
+        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "x86_adapt: failed to open '/dev/x86_adapt/node/definitions': %i!\n",fd);
+        /* why do the close here if the open failed? */
+        close(fd);
+        return -EIO;
+    }
     config_items_length[X86_ADAPT_DIE]=get_configuration_items(fd, &(config_items[X86_ADAPT_DIE]));
-	close(fd);
+    close(fd);
 
     fd_all=calloc(2,sizeof(struct fd_client_count));
     if (!fd_all)
@@ -201,31 +201,31 @@ int x86_adapt_init(void)
         }
     }
 
-	initialized=1;
+    initialized=1;
     pthread_mutex_unlock(&init_mutex);
-	return 0;
+    return 0;
 }
 
 /* returns file descriptor for /dev/x86_adapt/<cpu|node>/<nr>*/
 int x86_adapt_get_device(x86_adapt_device_type device_type, uint32_t nr)
 {
     struct fd_client_count* ccp;
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type > 1)
+    if (device_type > 1)
         return -ENXIO;
-	if (nr >= fds_length[device_type])
+    if (nr >= fds_length[device_type])
         return -ENXIO;
 
     ccp = &fds[device_type][nr];
     pthread_mutex_lock(&(ccp->mutex));
 
-	if (ccp->fd < 0) {
-		/* open the fd */
-		char buffer[256];
-		sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
-		ccp->fd = open(buffer, O_RDWR);
-	}
+    if (ccp->fd < 0) {
+        /* open the fd */
+        char buffer[256];
+        sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
+        ccp->fd = open(buffer, O_RDWR);
+    }
     if (ccp->fd >= 0) {
         /* increase nr of clients, but we don't assume a client to call put if he received an error. */
         ccp->clients++;
@@ -238,22 +238,22 @@ int x86_adapt_get_device(x86_adapt_device_type device_type, uint32_t nr)
 int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr)
 {
     struct fd_client_count* ccp;
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type > 1)
+    if (device_type > 1)
         return -ENXIO;
-	if (nr >= fds_length[device_type])
+    if (nr >= fds_length[device_type])
         return -ENXIO;
 
     ccp = &fds[device_type][nr];
     pthread_mutex_lock(&(ccp->mutex));
 
-	if (ccp->fd_ro < 0) {
-		/* open the fd */
-		char buffer[256];
-		sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
-		ccp->fd_ro = open(buffer, O_RDONLY);
-	}
+    if (ccp->fd_ro < 0) {
+        /* open the fd */
+        char buffer[256];
+        sprintf(buffer,"/dev/x86_adapt/%s/%i",device_type==0?"cpu":"node",nr);
+        ccp->fd_ro = open(buffer, O_RDONLY);
+    }
     if (ccp->fd_ro >= 0) {
         /* increase nr of clients, but we don't assume a client to call put if he received an error. */
         ccp->clients++;
@@ -266,18 +266,18 @@ int x86_adapt_get_device_ro(x86_adapt_device_type device_type, uint32_t nr)
 int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr)
 {
     struct fd_client_count* ccp;
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type > 1)
+    if (device_type > 1)
         return -ENXIO;
-	if (nr >= fds_length[device_type])
+    if (nr >= fds_length[device_type])
         return -ENXIO;
 
     ccp = &fds[device_type][nr];
     pthread_mutex_lock(&(ccp->mutex));
 
-	/* are we the last client? */
-	if (ccp->clients == 1) {
+    /* are we the last client? */
+    if (ccp->clients == 1) {
         if (ccp->fd >= 0) {
             close(ccp->fd);
             ccp->fd = -1;
@@ -286,11 +286,11 @@ int x86_adapt_put_device(x86_adapt_device_type device_type, uint32_t nr)
             close(ccp->fd_ro);
             ccp->fd_ro = -1;
         }
-	}
+    }
 
-	ccp->clients--;
+    ccp->clients--;
     pthread_mutex_unlock(&(ccp->mutex));
-	return 0;
+    return 0;
 }
 
 
@@ -316,66 +316,66 @@ int x86_adapt_get_all_devices_ro(x86_adapt_device_type device_type) {
 
 /* returns file descriptor for /dev/x86_adapt/all */
 int x86_adapt_get_all_devices(x86_adapt_device_type device_type) {
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type > 1)
+    if (device_type > 1)
         return -ENXIO;
     pthread_mutex_lock(&fd_all[device_type].mutex);
-	/* are we the first client? */
-	if (fd_all[device_type].clients==0) {
-		/* open the fd */
-		char buffer[256];
-		sprintf(buffer,"/dev/x86_adapt/%s/all",device_type==0?"cpu":"node");
-		fd_all[device_type].fd=open(buffer, O_RDWR);
-	}
-	/* increase nr of clients */
-	fd_all[device_type].clients++;
+    /* are we the first client? */
+    if (fd_all[device_type].clients==0) {
+        /* open the fd */
+        char buffer[256];
+        sprintf(buffer,"/dev/x86_adapt/%s/all",device_type==0?"cpu":"node");
+        fd_all[device_type].fd=open(buffer, O_RDWR);
+    }
+    /* increase nr of clients */
+    fd_all[device_type].clients++;
     pthread_mutex_unlock(&fd_all[device_type].mutex);
-	return fd_all[device_type].fd;
+    return fd_all[device_type].fd;
 }
 
 /* closes file descriptor */
 int x86_adapt_put_all_devices(x86_adapt_device_type device_type)
 {
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type > 1)
+    if (device_type > 1)
         return -ENXIO;
-  pthread_mutex_lock(&init_mutex);
-  pthread_mutex_lock(&fd_all[device_type].mutex);
-	/* are we the last client? */
-	if (fd_all[device_type].clients==1) {
-		/* close the fd */
-		close(fd_all[device_type].fd);
-	}
-	/* increase nr of clients */
-	fd_all[device_type].clients--;
+    pthread_mutex_lock(&init_mutex);
+    pthread_mutex_lock(&fd_all[device_type].mutex);
+    /* are we the last client? */
+    if (fd_all[device_type].clients==1) {
+        /* close the fd */
+        close(fd_all[device_type].fd);
+    }
+    /* increase nr of clients */
+    fd_all[device_type].clients--;
     pthread_mutex_unlock(&fd_all[device_type].mutex);
-  pthread_mutex_unlock(&init_mutex);
-	return 0;
+    pthread_mutex_unlock(&init_mutex);
+    return 0;
 }
 
 /* returns the defintion of cpu/node x86_adapt configuration item */
 int x86_adapt_get_ci_definition(x86_adapt_device_type device_type, uint32_t id, struct x86_adapt_configuration_item * item)
 {
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type >= X86_ADAPT_MAX)
+    if (device_type >= X86_ADAPT_MAX)
         return -ENXIO;
-	if (id>=config_items_length[device_type])
+    if (id>=config_items_length[device_type])
         return -ENXIO;
-	*item=config_items[device_type][id];
-	return 0;
+    *item=config_items[device_type][id];
+    return 0;
 }
 
 /* returns number of cpu/die configuration items */
 int x86_adapt_get_number_cis(x86_adapt_device_type device_type)
 {
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	if (device_type >= X86_ADAPT_MAX)
+    if (device_type >= X86_ADAPT_MAX)
         return -ENXIO;
-	return config_items_length[device_type];
+    return config_items_length[device_type];
 }
 
 /* returns the index number of the supplied configuration item */
@@ -396,45 +396,45 @@ int x86_adapt_lookup_ci_name(x86_adapt_device_type device_type, const char * nam
 /*  for a specific configuration item */
 int x86_adapt_get_setting(int fd, int id, uint64_t * setting)
 {
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	/* pread at id */
-	return pread(fd,setting,8,id);
+    /* pread at id */
+    return pread(fd,setting,8,id);
 }
 /*  for a specific configuration item */
 int x86_adapt_set_setting(int fd, int id, uint64_t setting)
 {
-	if (!initialized)
+    if (!initialized)
         return -EPERM;
-	/* pread at id */
-	return pwrite(fd,&setting,8,id);
+    /* pread at id */
+    return pwrite(fd,&setting,8,id);
 }
 
 /* This should finalize the library, close fd's and free data structures */
 void x86_adapt_finalize(void)
 {
-	unsigned int j,i;
+    unsigned int j,i;
     pthread_mutex_lock(&init_mutex);
-	if (!initialized)
+    if (!initialized)
         return;
-	for (i=0;i<2;i++) {
-		for (j=0;j<fds_length[i];j++) {
-			if (fds[i][j].clients!=0)
-				close(fds[i][j].fd);
+    for (i=0;i<2;i++) {
+        for (j=0;j<fds_length[i];j++) {
+            if (fds[i][j].clients!=0)
+                close(fds[i][j].fd);
             pthread_mutex_destroy(&fds[i][j].mutex);
         }
         for (j=0;j<config_items_length[i];j++) {
             free(config_items[i][j].name);
             free(config_items[i][j].description);
         }
-		free(fds[i]);
-		free(config_items[i]);
+        free(fds[i]);
+        free(config_items[i]);
         pthread_mutex_destroy(&fd_all[i].mutex);
-	}
-	free(fds);
+    }
+    free(fds);
     free(fd_all);
-	free(config_items);
-	initialized=0;
+    free(config_items);
+    initialized=0;
     pthread_mutex_unlock(&init_mutex);
     return;
 }

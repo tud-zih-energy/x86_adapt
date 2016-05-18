@@ -166,7 +166,7 @@ int main(int argc, char ** argv)
     }
     if (strcmp(item.name,knob)==0)
     {
-	break;
+      break;
     }
   }
   /* not found? */

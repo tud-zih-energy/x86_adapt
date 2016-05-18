@@ -784,7 +784,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
             if (!err && (knob.bitmask >= (1ULL << 32)))
             {
                 u32 l2;
-           	err = pci_read_config_dword(nb,knob.register_index+4,&h);
+                err = pci_read_config_dword(nb,knob.register_index+4,&h);
                 if ( err ) return err;
                 err = pci_read_config_dword(nb,knob.register_index,&l2);
                 if ( err ) return err;
@@ -792,7 +792,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
                 while ( l2 < l )
                 {
                     l=l2;
-           	    err = pci_read_config_dword(nb,knob.register_index+4,&h);
+                    err = pci_read_config_dword(nb,knob.register_index+4,&h);
                     if ( err ) return err;
                     err = pci_read_config_dword(nb,knob.register_index,&l2);
                     if ( err ) return err;
@@ -988,7 +988,7 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
            err = pci_write_config_dword(nb,knob.register_index,l);
            if (!err && (knob.bitmask >= ((u64)1 << 32)))
            {
-           	err = pci_write_config_dword(nb,knob.register_index+4,h);
+               err = pci_write_config_dword(nb,knob.register_index+4,h);
            }
         }
         return err;
