@@ -1362,7 +1362,7 @@ static int x86_adapt_device_create(int cpu)
     struct device *dev;
 
     dev = device_create(x86_adapt_class,NULL,MKDEV(MAJOR(x86_adapt_cpu_device), 
-                MINOR(x86_adapt_cpu_device)+cpu),NULL,"cpu%d",cpu);
+                MINOR(x86_adapt_cpu_device)+cpu),NULL,"cpu_%d",cpu);
 
     return IS_ERR(dev) ? PTR_ERR(dev) : 0;
 }
