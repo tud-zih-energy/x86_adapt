@@ -38,6 +38,30 @@ cp -r driver/. debpack/usr/src/x86_adapt_driver-template/src
 ./definition_driver/prepare.py debpack/usr/src/x86_adapt_driver-template/definition_driver definition_driver/
 cp --parents definition_driver/x86_adapt_defs.h debpack/usr/src/x86_adapt_driver-template/
 
+
+#building libs and example programs
+mkdir build
+cd build
+cmake ..
+make
+cd -
+
+#copy programs
+mkdir -p  debpack/usr/bin
+cp build/x86a_read debpack/usr/bin
+cp build/x86a_write debpack/usr/bin
+mkdir -p  debpack/usr/include
+cp library/include/x86_adapt.h debpack/usr/include
+mkdir -p debpack/usr/share
+cp -r library/doc/man debpack/usr/share
+
+#copy libs
+mkdir -p debpack/usr/lib
+cp build/libx86_adapt* debpack/usr/lib
+
+#remove build directory
+rm -r build
+
 #rename dkms directory
 mv debpack/usr/src/x86_adapt_defs-template/ debpack/usr/src/x86_adapt_defs-$REVISION
 mv debpack/usr/src/x86_adapt_driver-template/ debpack/usr/src/x86_adapt_driver-$REVISION
