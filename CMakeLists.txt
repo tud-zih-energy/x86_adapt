@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(x86_adapt)
+# set -DNO_KERNEL_DRIVER=On to disable building the driver
+option(NO_KERNEL_DRIVER "Disable build/install of kernel driver")
+
 
 set(CMAKE_C_FLAGS "-fPIC -ggdb -Wall")
 set(CMAKE_C_FLAGS_RELEASE "-Os")
@@ -63,7 +66,10 @@ add_library(${PROJECT_NAME} SHARED library/src/x86_adapt.c)
 add_library(${PROJECT_NAME}_static STATIC library/src/x86_adapt.c)
 include_directories(${PROJECT_NAME} ${LIBRARY_INC})
 include_directories(${PROJECT_NAME}_static ${LIBRARY_INC})
-add_dependencies(${PROJECT_NAME} x86_adapt_driver)
+
+if(NOT ${NO_KERNEL_DRIVER})
+	add_dependencies(${PROJECT_NAME} x86_adapt_driver)
+endif(NOT ${NO_KERNEL_DRIVER})
 
 add_executable(x86a_read library/examples/x86a_read.c)
 add_executable(x86a_write library/examples/x86a_write.c)
@@ -79,7 +85,9 @@ install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION lib)
 install(TARGETS x86a_read DESTINATION bin)
 install(TARGETS x86a_write DESTINATION bin)
 install(DIRECTORY library/doc/man DESTINATION share)
-install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR}/kernel_module modules_install)")
-install(CODE "execute_process(COMMAND depmod)")
+if(NOT ${NO_KERNEL_DRIVER})
+	install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR}/kernel_module modules_install)")
+	install(CODE "execute_process(COMMAND depmod)")
+endif(NOT ${NO_KERNEL_DRIVER})
 
 
