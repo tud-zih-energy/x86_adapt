@@ -1,0 +1,10 @@
+//#description
+Value since last reset that this package is in processor-specific C7 states. Count at the same frequency as the TSC.
+//#device
+MSRNODE
+//#register_index
+0x000003fa
+//#restricted_settings
+readonly
+//#processor_groups
+nehalem,westmere,sandybridge,ivybridge,haswell,broadwell,skylake
