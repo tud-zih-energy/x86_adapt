@@ -1,0 +1,12 @@
+//#description
+Accumulated Package Throttled Time, use Intel_RAPL_Power_Unit to get the time units
+//#device
+MSRNODE
+//#register_index
+0x613
+//#bit_mask
+(0x00000000FFFFFFFF)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge,ivybridge,haswell,broadwell,skylake,knl
