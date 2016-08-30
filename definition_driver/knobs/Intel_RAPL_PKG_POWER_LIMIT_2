@@ -5,6 +5,6 @@ MSRNODE
 //#register_index
 0x610
 //#bit_mask
-(0xFFFFFFULL)<<32
+(0xFFFFFFULL<<32)
 //#processor_groups
 sandybridge,ivybridge,haswell,broadwell,skylake
