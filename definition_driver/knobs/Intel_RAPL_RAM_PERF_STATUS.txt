@@ -1,0 +1,12 @@
+//#description
+Accumulated DRAM Throttled Time, use Intel_RAPL_Power_Unit to get the time units
+//#device
+MSRNODE
+//#register_index
+0x61b
+//#bit_mask
+(0xFFFFFFFF)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge_ep,ivybridge_ep,haswell_ep,broadwell_ep,knl

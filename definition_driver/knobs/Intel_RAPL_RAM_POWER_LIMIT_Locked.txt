@@ -1,0 +1,12 @@
+//#description
+MSR 0x618 [32] is power limit for DRAM locked?
+//#device
+MSRNODE
+//#register_index
+0x618
+//#bit_mask
+(0x1ULL<<32)
+//#restricted_settings
+readonly
+//#processor_groups
+sandybridge_ep,ivybridge_ep,haswell_ep,broadwell_ep

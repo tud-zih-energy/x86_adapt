@@ -7,4 +7,4 @@ MSRNODE
 //#bit_mask
 0xFFFFFF
 //#processor_groups
-sandybridge,ivybridge,haswell,broadwell,skylake
+sandybridge_ep,ivybridge_ep,haswell_ep,broadwell_ep
