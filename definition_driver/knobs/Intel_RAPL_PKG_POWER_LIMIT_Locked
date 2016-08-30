@@ -1,0 +1,10 @@
+//#description
+MSR 0x610 [63] is package power locked?
+//#device
+MSRNODE
+//#register_index
+0x610
+//#bit_mask
+0x1ULL<<63
+//#processor_groups
+sandybridge,ivybridge,haswell,broadwell,skylake
