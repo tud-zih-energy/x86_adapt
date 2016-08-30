@@ -6,5 +6,7 @@ MSRNODE
 0x610
 //#bit_mask
 (1ULL<<63)
+//#restricted_settings
+readonly
 //#processor_groups
 sandybridge,ivybridge,haswell,broadwell,skylake
