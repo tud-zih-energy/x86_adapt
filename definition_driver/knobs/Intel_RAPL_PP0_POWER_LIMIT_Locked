@@ -1,10 +1,12 @@
 //#description
-MSR 0x639 [32] is PP0 power locked?
+MSR 0x638 [32] is PP0 power locked?
 //#device
 MSRNODE
 //#register_index
 0x639
 //#bit_mask
-0x1ULL<<32
+(0x1ULL<<32)
+//#restricted_settings
+readonly
 //#processor_groups
 sandybridge,ivybridge,haswell,broadwell,skylake
