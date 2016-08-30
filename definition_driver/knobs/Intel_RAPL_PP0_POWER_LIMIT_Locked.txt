@@ -3,7 +3,7 @@ MSR 0x638 [32] is PP0 power locked?
 //#device
 MSRNODE
 //#register_index
-0x639
+0x638
 //#bit_mask
 (0x1ULL<<32)
 //#restricted_settings
