@@ -1,0 +1,12 @@
+//#description
+MSR 0xC8E which contains resource monitoring data (L3-occupancy)
+//#device
+MSR
+//#register_index
+0xC8E
+//#bit_mask
+0xFFFFFFFFFFFFFFFFULL
+//#restricted_settings
+readonly
+//#processor_groups
+haswell_ep
