@@ -9,4 +9,4 @@ MSRNODE
 //#restricted_settings
 readonly
 //#processor_groups
-sandybridge_ep,ivybridge_ep,haswell_ep,broadwell_ep
+sandybridge_ep,ivybridge_ep,haswell_ep,broadwell_ep,knl
