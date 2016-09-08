@@ -111,7 +111,7 @@ int __get_avaible(char * path)
     }
     close(fd);
 
-    
+
     /* count avaible devices */
     n = scandir(path, &namelist, NULL, versionsort);
 
@@ -144,17 +144,25 @@ int x86_adapt_init(void)
     unsigned int i, j;
     pthread_mutex_lock(&init_mutex);
     if (initialized) {
+        initialized++;
         pthread_mutex_unlock(&init_mutex);
         return 0;
     }
     /* initialize the configuration_items */
     config_items=calloc(2,(sizeof(void*)));
     if(!config_items)
+    {
+        pthread_mutex_unlock(&init_mutex);
+
         return -ENOMEM;
+    }
     fd = open("/dev/x86_adapt/cpu/definitions", O_RDONLY);
     if (fd < 0) {
         fprintf(stderr, "ERROR\n");
         fprintf(stderr, "x86_adapt: failed to open '/dev/x86_adapt/cpu/definitions': %i!\n",fd);
+
+        pthread_mutex_unlock(&init_mutex);
+
         return -EIO;
     }
     config_items_length[X86_ADAPT_CPU]=get_configuration_items(fd, &(config_items[X86_ADAPT_CPU]));
@@ -166,6 +174,9 @@ int x86_adapt_init(void)
         fprintf(stderr, "x86_adapt: failed to open '/dev/x86_adapt/node/definitions': %i!\n",fd);
         /* why do the close here if the open failed? */
         close(fd);
+
+        pthread_mutex_unlock(&init_mutex);
+
         return -EIO;
     }
     config_items_length[X86_ADAPT_DIE]=get_configuration_items(fd, &(config_items[X86_ADAPT_DIE]));
@@ -173,11 +184,19 @@ int x86_adapt_init(void)
 
     fd_all=calloc(2,sizeof(struct fd_client_count));
     if (!fd_all)
+    {
+        pthread_mutex_unlock(&init_mutex);
+
         return -ENOMEM;
-    
+    }
+
     fds=malloc(2*sizeof(void *));
     if (!fds)
+    {
+        pthread_mutex_unlock(&init_mutex);
+
         return -ENOMEM;
+    }
 
     /* TODO: besseren wert einlesen */
     fds_length[X86_ADAPT_CPU]=sysconf(_SC_NPROCESSORS_CONF);
@@ -185,11 +204,19 @@ int x86_adapt_init(void)
 
     fds[X86_ADAPT_CPU]=calloc(fds_length[X86_ADAPT_CPU],sizeof(struct fd_client_count));
     if (!fds[X86_ADAPT_CPU])
+    {
+        pthread_mutex_unlock(&init_mutex);
+
         return -ENOMEM;
+    }
 
     fds[X86_ADAPT_DIE]=calloc(fds_length[X86_ADAPT_DIE],sizeof(struct fd_client_count));
     if (!fds[X86_ADAPT_DIE])
+    {
+        pthread_mutex_unlock(&init_mutex);
+
         return -ENOMEM;
+    }
 
     /* init local mutexes */
     for(i=0;i<2;i++) {
@@ -201,7 +228,7 @@ int x86_adapt_init(void)
         }
     }
 
-    initialized=1;
+    initialized = 1;
     pthread_mutex_unlock(&init_mutex);
     return 0;
 }
@@ -415,12 +442,28 @@ void x86_adapt_finalize(void)
 {
     unsigned int j,i;
     pthread_mutex_lock(&init_mutex);
-    if (!initialized)
+
+    if (initialized == 0)
+    {
+        // HELP you are an idiot
+        pthread_mutex_unlock(&init_mutex);
+
         return;
+    }
+
+    if ( initialized-- > 1 )
+    {
+        pthread_mutex_unlock(&init_mutex);
+
+        return;
+    }
+
     for (i=0;i<2;i++) {
         for (j=0;j<fds_length[i];j++) {
             if (fds[i][j].clients!=0)
+            {
                 close(fds[i][j].fd);
+            }
             pthread_mutex_destroy(&fds[i][j].mutex);
         }
         for (j=0;j<config_items_length[i];j++) {
@@ -434,7 +477,6 @@ void x86_adapt_finalize(void)
     free(fds);
     free(fd_all);
     free(config_items);
-    initialized=0;
     pthread_mutex_unlock(&init_mutex);
     return;
 }
