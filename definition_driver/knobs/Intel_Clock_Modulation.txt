@@ -9,4 +9,4 @@ MSR
 //#reserved_settings
 (0x10)
 //#processor_groups
-sandybridge,ivybridge,haswell,broadwell,skylake
+sandybridge,ivybridge,haswell,broadwell,skylake,knl
