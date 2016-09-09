@@ -830,6 +830,8 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
         if (setting == knob.reserved_settings[i])
           return -EINVAL;
 
+    if ( knob.length < 64 && setting >= (1ULL<<knob.length) )
+        return -EINVAL;
 
     /* read register */
     ret = read_setting(dev_nr,knob,&orig_setting);
