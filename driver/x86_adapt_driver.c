@@ -8,7 +8,6 @@
 #include <linux/slab.h>
 #include <linux/pci.h>
 #include <linux/string.h>
-#include <linux/mutex.h>
 #include <linux/smp.h>
 #include <linux/cpu.h>
 #include <linux/version.h>
@@ -591,31 +590,6 @@ fail:
     return -ENOMEM;
 
 }
-
-
-/* overrides the default kernel llseek function to prevent a not working pread/pwrite on certain kernel versions */
-static loff_t x86_adapt_seek(struct file *file, loff_t offset, int orig)
-{
-    loff_t ret;
-    struct inode *inode = file->f_mapping->host;
-
-    mutex_lock(&inode->i_mutex);
-    switch (orig) {
-    case 0:
-        file->f_pos = offset;
-        ret = file->f_pos;
-        break;
-    case 1:
-        file->f_pos += offset;
-        ret = file->f_pos;
-        break;
-    default:
-        ret = -EINVAL;
-    }
-    mutex_unlock(&inode->i_mutex);
-    return ret;
-}
-
 
 /* returns from register reading the corresponding bits to the given bitmask */
 __always_inline static u64 get_setting_from_register_reading(u64 register_reading, u64 bitmask) 
@@ -1333,14 +1307,14 @@ static ssize_t def_cpu_read(struct file * file, char * buf, size_t count, loff_t
 
 static const struct file_operations x86_adapt_cpu_fops = {
     .owner                = THIS_MODULE,
-    .llseek               = x86_adapt_seek,
+    .llseek               = default_llseek,
     .read                 = cpu_read,
     .write                = cpu_write,
 };
 
 static const struct file_operations x86_adapt_node_fops = {
     .owner                = THIS_MODULE,
-    .llseek               = x86_adapt_seek,
+    .llseek               = default_llseek,
     .read                 = node_read,
     .write                = node_write,
 };
