@@ -258,6 +258,12 @@ int x86_adapt_init(void);
  * ErrorCode depends on a call to open() 
  * @see file.h open
  */
+int x86_adapt_get_nr_available_devices(x86_adapt_device_type device_type);
+
+/** @brief deprecated, use x86_adapt_get_nr_available_devices
+ *
+ * for parameters and return codes also see x86_adapt_get_nr_available_devices
+ */
 int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type);
 
 /** @brief get a read-only file descriptor for a specific CPU or node

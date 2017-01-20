@@ -124,7 +124,7 @@ int __get_avaible(char * path)
     return count;
 }
 
-int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type)
+int x86_adapt_get_nr_available_devices(x86_adapt_device_type device_type)
 {
     switch (device_type)
     {
@@ -135,6 +135,11 @@ int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type)
         default:
             return -1;
     }
+}
+
+int x86_adapt_get_nr_avaible_devices(x86_adapt_device_type device_type)
+{
+    return x86_adapt_get_nr_available_devices(device_type);
 }
 
 /* This should initialize the library and allocate data structures */

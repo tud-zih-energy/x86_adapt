@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
   /* set setting */
   if ( cpu == -1 )
   {
-    for ( cpu = 0 ; cpu < x86_adapt_get_nr_avaible_devices(type) ; cpu++ )
+    for ( cpu = 0 ; cpu < x86_adapt_get_nr_available_devices(type) ; cpu++ )
     {
       if  (verbose)
         fprintf(stdout,"Set definition %s on %s %d to %"PRIi64"\n",knob,type==X86_ADAPT_DIE?"node":"CPU",cpu,new_setting);

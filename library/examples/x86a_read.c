@@ -242,7 +242,7 @@ int main(int argc, char ** argv)
   print_header( type, item_min, item_max );
   if ( cpu == -1 )
   {
-    for ( cpu = 0 ; cpu < x86_adapt_get_nr_avaible_devices(type) ; cpu++ )
+    for ( cpu = 0 ; cpu < x86_adapt_get_nr_available_devices(type) ; cpu++ )
     {
       print_cpu( type, cpu, hex, item_min, item_max );
     }
