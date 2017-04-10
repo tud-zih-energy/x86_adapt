@@ -121,6 +121,13 @@ int __get_avaible(char * path)
             count++;
         }
     }
+    
+    /* free allocated resources */
+    for(i=0;i<n;i++) {
+        free(namelist[i]);
+    }
+    free(namelist);
+    
     return count;
 }
 
