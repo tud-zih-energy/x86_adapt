@@ -1397,7 +1397,7 @@ static struct notifier_block x86_adapt_cpu_notifier __refdata = {
     .notifier_call = x86_adapt_cpu_callback,
 };
 
-#else
+#else /* #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0) */
 static enum cpuhp_state cpuhp_x86a_state;
 
 static int x86_adapt_cpu_hotplug_offline(unsigned int cpu)
@@ -1408,7 +1408,17 @@ static int x86_adapt_cpu_hotplug_offline(unsigned int cpu)
 }
 static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
 {
-    int err = x86_adapt_device_create(cpu);
+    int err;
+    
+    /* unfortunately devices that are online at init receive the hp online call, even though they've been online before.
+    * To avoid creating a device twice (which results in a kernel log entry, including stack trace), the devices are
+    * destroyed before they are created. device_destroy should check whether the device exists.
+    */
+    device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
+                MINOR(x86_adapt_cpu_device)+cpu));
+
+    /* create the device that's been switched on */
+    err = x86_adapt_device_create(cpu);
     if (!err)
         read_defaults_cpu(cpu);
     return 0;
