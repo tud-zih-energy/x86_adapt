@@ -203,42 +203,42 @@ static struct class * x86_adapt_class;
 /* TODO: refactor, so that the AMD devices dont use memory on Intel and vice versa */
 
 /* AMD */
-struct pci_dev ** nb_f0 = NULL;
-struct pci_dev ** nb_f1 = NULL;
-struct pci_dev ** nb_f2 = NULL;
-struct pci_dev ** nb_f3 = NULL;
-struct pci_dev ** nb_f4 = NULL;
-struct pci_dev ** nb_f5 = NULL;
+static struct pci_dev ** nb_f0 = NULL;
+static struct pci_dev ** nb_f1 = NULL;
+static struct pci_dev ** nb_f2 = NULL;
+static struct pci_dev ** nb_f3 = NULL;
+static struct pci_dev ** nb_f4 = NULL;
+static struct pci_dev ** nb_f5 = NULL;
 
 /* Intel Sandy Bridge EP */
-struct pci_dev ** sb_pcu0 = NULL;
-struct pci_dev ** sb_pcu1 = NULL;
-struct pci_dev ** sb_pcu2 = NULL;
+static struct pci_dev ** sb_pcu0 = NULL;
+static struct pci_dev ** sb_pcu1 = NULL;
+static struct pci_dev ** sb_pcu2 = NULL;
 
 /* Intel Haswell EP */
-struct pci_dev ** hsw_pcu0 = NULL;
-struct pci_dev ** hsw_pcu1 = NULL;
-struct pci_dev ** hsw_pcu2 = NULL;
+static struct pci_dev ** hsw_pcu0 = NULL;
+static struct pci_dev ** hsw_pcu1 = NULL;
+static struct pci_dev ** hsw_pcu2 = NULL;
 
 /* Intel Haswell EP Performance Monitor registers*/
 /* TODO support 64 bit length with 2 PCI registers */
 
-struct pci_dev ** hsw_pmon_ha0 = NULL;
-struct pci_dev ** hsw_pmon_ha1 = NULL;
-struct pci_dev ** hsw_pmon_mc0_chan0 = NULL;
-struct pci_dev ** hsw_pmon_mc0_chan1 = NULL;
-struct pci_dev ** hsw_pmon_mc0_chan2 = NULL;
-struct pci_dev ** hsw_pmon_mc0_chan3 = NULL;
-struct pci_dev ** hsw_pmon_mc1_chan0 = NULL;
-struct pci_dev ** hsw_pmon_mc1_chan1 = NULL;
-struct pci_dev ** hsw_pmon_mc1_chan2 = NULL;
-struct pci_dev ** hsw_pmon_mc1_chan3 = NULL;
-struct pci_dev ** hsw_pmon_irp = NULL;
-struct pci_dev ** hsw_pmon_qpi_p0 = NULL;
-struct pci_dev ** hsw_pmon_qpi_p1 = NULL;
-struct pci_dev ** hsw_pmon_r2pcie = NULL;
-struct pci_dev ** hsw_pmon_r3qpi_l0 = NULL;
-struct pci_dev ** hsw_pmon_r3qpi_l1 = NULL;
+static struct pci_dev ** hsw_pmon_ha0 = NULL;
+static struct pci_dev ** hsw_pmon_ha1 = NULL;
+static struct pci_dev ** hsw_pmon_mc0_chan0 = NULL;
+static struct pci_dev ** hsw_pmon_mc0_chan1 = NULL;
+static struct pci_dev ** hsw_pmon_mc0_chan2 = NULL;
+static struct pci_dev ** hsw_pmon_mc0_chan3 = NULL;
+static struct pci_dev ** hsw_pmon_mc1_chan0 = NULL;
+static struct pci_dev ** hsw_pmon_mc1_chan1 = NULL;
+static struct pci_dev ** hsw_pmon_mc1_chan2 = NULL;
+static struct pci_dev ** hsw_pmon_mc1_chan3 = NULL;
+static struct pci_dev ** hsw_pmon_irp = NULL;
+static struct pci_dev ** hsw_pmon_qpi_p0 = NULL;
+static struct pci_dev ** hsw_pmon_qpi_p1 = NULL;
+static struct pci_dev ** hsw_pmon_r2pcie = NULL;
+static struct pci_dev ** hsw_pmon_r3qpi_l0 = NULL;
+static struct pci_dev ** hsw_pmon_r3qpi_l1 = NULL;
 
 
 /* artificial knob for resetting */
@@ -264,6 +264,11 @@ static struct knob_entry * active_knobs_node = NULL;
  * Defaults are set when the driver is loaded
  */
 static u64 ** defaults_node = NULL;
+
+/* Defaults that are passed as parameters
+*/
+static char *Defaults;
+module_param(Defaults, charp, 0);
 
 /* knobs of CPUs */
 static u32 active_knobs_cpu_length = 0;
@@ -464,6 +469,54 @@ static inline void free_defaults(void)
 }
 
 /**
+* This function checks whether a default for knob with a specific name has been set as a module parameter
+* if so, it returns 1 and the set default in return_value;
+*/
+static int defaults_param(char* name, u64 * return_value)
+{
+    char * token;
+    char * Defaults_copy=Defaults;
+
+    if (Defaults==NULL)
+        return 0;
+
+    /* first separated by ;*/
+    token = strsep(&Defaults_copy,";");
+    while ( token != NULL )
+    {
+         char* pos_equals=strchr(token,':');
+         if ( pos_equals != NULL )
+         {
+             /* only if there is a value */
+             if ( strlen(pos_equals) > 1)
+             {
+                 u64 value;
+                 /* get value */
+                 if ( ! kstrtou64(pos_equals+1,10,&value) )
+                 {
+                     /* if it is the right knob */
+                     if ( strlen(name)==pos_equals-token )
+                     {
+                         if (strncmp(name,token,pos_equals-token) == 0)
+                         {
+                             *return_value = value;
+                             return 1;
+                         }
+                     }
+                 }
+             }
+         }
+         else
+         {
+             printk(KERN_ERR "Invalid Default parameter %s.\n", token);
+         }
+        token = strsep(&Defaults_copy,";");
+    }
+    return 0;
+
+}
+
+/**
 * read defaults from a CPU
 * This function returns 0 if:
 * - the defaults are already read
@@ -475,6 +528,7 @@ static inline void free_defaults(void)
 static inline int read_defaults_cpu(int cpu)
 {
     u32 knob;
+    u64 value_from_param;
     int ret;
     /* only if CPU is online and the default was not read before */
     if (cpu_online(cpu) && defaults_cpu[cpu] == NULL )
@@ -484,13 +538,20 @@ static inline int read_defaults_cpu(int cpu)
              return -ENOMEM;
         for (knob=1;knob<active_knobs_cpu_length;knob++)
         {
-             ret = read_setting(cpu,active_knobs_cpu[knob],&defaults_cpu[cpu][knob-1]);
-             defaults_cpu[cpu][knob-1] = get_setting_from_register_reading(defaults_cpu[cpu][knob-1], active_knobs_cpu[knob].bitmask);
-             if (ret)
+             if (defaults_param(active_knobs_cpu[knob].name,&value_from_param))
              {
-                 kfree(defaults_cpu[cpu]);
-                 defaults_cpu[cpu] = NULL;
-                 return ret;
+                  defaults_cpu[cpu][knob-1] = value_from_param;
+             }
+             else
+             {
+                 ret = read_setting(cpu,active_knobs_cpu[knob],&defaults_cpu[cpu][knob-1]);
+                 defaults_cpu[cpu][knob-1] = get_setting_from_register_reading(defaults_cpu[cpu][knob-1], active_knobs_cpu[knob].bitmask);
+                 if (ret)
+                 {
+                     kfree(defaults_cpu[cpu]);
+                     defaults_cpu[cpu] = NULL;
+                     return ret;
+                 }
              }
         }
     }
@@ -506,15 +567,23 @@ static inline int read_defaults(void)
 {
     u32 node, cpu, knob;
     int ret;
+    u64 value_from_param;
     /* read defaults */
     for (node=0;node<num_possible_nodes();node++)
     {
         for (knob=1;knob<active_knobs_node_length;knob++)
         {
-             ret = read_setting(node,active_knobs_node[knob],&defaults_node[node][knob-1]);
-             defaults_node[node][knob-1] = get_setting_from_register_reading(defaults_node[node][knob-1], active_knobs_node[knob].bitmask);
-             if (ret)
-                 return ret;
+             if (defaults_param(active_knobs_node[knob].name,&value_from_param))
+             {
+                  defaults_node[node][knob-1] = value_from_param;
+             }
+             else
+             {
+                 ret = read_setting(node,active_knobs_node[knob],&defaults_node[node][knob-1]);
+                 defaults_node[node][knob-1] = get_setting_from_register_reading(defaults_node[node][knob-1], active_knobs_node[knob].bitmask);
+                 if (ret)
+                     return ret;
+             }
         }
     }
     
