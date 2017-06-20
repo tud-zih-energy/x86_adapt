@@ -3,7 +3,7 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/mount.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <linux/dcache.h>
 #include <linux/slab.h>
 #include <linux/pci.h>
