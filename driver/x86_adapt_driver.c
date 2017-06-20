@@ -64,6 +64,7 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 
 
 /* allocates memory for a northbridge pci device and adds it */
+#ifdef CONFIG_AMD_NB
 #define ALLOC_NB_PCI(NUM) \
     do { \
         nb_f##NUM = kmalloc(num_possible_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
@@ -73,11 +74,28 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
             goto fail; \
         } \
         for_each_node(i) \
+/* if northbridge configured, add pci devices  */ \
             if (node_to_amd_nb(i)!=NULL) \
               nb_f##NUM [i] = pci_get_bus_and_slot(0, PCI_DEVFN(PCI_SLOT(node_to_amd_nb(i)->misc->devfn),NUM)); \
             else \
               nb_f##NUM [i] = NULL; \
     } while (0)
+
+#else /* #ifdef CONFIG_AMD_NB */
+
+#define ALLOC_NB_PCI(NUM) \
+    do { \
+        nb_f##NUM = kmalloc(num_possible_nodes()*sizeof(struct pci_dev *),GFP_KERNEL); \
+        if (nb_f##NUM == NULL) { \
+            err = -ENOMEM; \
+            printk(KERN_ERR "Failed to allocate memory for nb_fd%d\n", NUM); \
+            goto fail; \
+        } \
+        for_each_node(i) \
+            nb_f##NUM [i] = NULL; \
+    } while (0)
+#endif
+
 
 /* checks if the char device was properly intialized and then it will be unregistered and deleted */
 #define UNREGISTER_AND_DELETE(DEV, FUNC, TYPE) \
@@ -677,6 +695,16 @@ __always_inline static u64 get_setting_from_register_reading(u64 register_readin
     return ret_val;
 }
 
+__always_inline static int get_current_task_cpu(void)
+{
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+    return current->cpu;
+#else
+    struct thread_info *ti =task_thread_info(current);
+    return ti->cpu;
+#endif
+}
+
 /* reads the setting of msr / pci knob */
 static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading) 
 {
@@ -742,11 +770,10 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
                 {
-                    int cpu;
+                    int cpu=get_current_task_cpu();
                     /* get the first of the online cpus */
                     /* check whether this tasks cpu is on node */
-                    struct thread_info *ti =task_thread_info(current);
-                    cpu=ti->cpu;
+
                     /* if this task is already on the node, use this tasks cpu */
                     if (cpumask_test_cpu(cpu,&node_online))
                     {
@@ -948,11 +975,10 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
                 {
-                    int cpu;
+                    int cpu=get_current_task_cpu();
                     /* get the first of the online cpus */
                     /* check whether this tasks cpu is on node */
-                    struct thread_info *ti =task_thread_info(current);
-                    cpu=ti->cpu;
+
                     /* if this task is already on the node, use this tasks cpu */
                     if (cpumask_test_cpu(cpu,&node_online))
                     {
@@ -1409,6 +1435,8 @@ static int x86_adapt_device_create(int cpu)
     return IS_ERR(dev) ? PTR_ERR(dev) : 0;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+
 /* function to manage cpu hotplug events */
 static int x86_adapt_cpu_callback(struct notifier_block *nfb,
                                 unsigned long action, void *hcpu)
@@ -1432,9 +1460,41 @@ static int x86_adapt_cpu_callback(struct notifier_block *nfb,
     return notifier_from_errno(err);
 }
 
+
+
 static struct notifier_block x86_adapt_cpu_notifier __refdata = {
     .notifier_call = x86_adapt_cpu_callback,
 };
+
+#else /* #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0) */
+static enum cpuhp_state cpuhp_x86a_state;
+
+static int x86_adapt_cpu_hotplug_offline(unsigned int cpu)
+{
+    device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
+                MINOR(x86_adapt_cpu_device)+cpu));
+    return 0;
+}
+static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
+{
+    int err;
+    
+    /* unfortunately devices that are online at init receive the hp online call, even though they've been online before.
+    * To avoid creating a device twice (which results in a kernel log entry, including stack trace), the devices are
+    * destroyed before they are created. device_destroy should check whether the device exists.
+    */
+    device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
+                MINOR(x86_adapt_cpu_device)+cpu));
+
+    /* create the device that's been switched on */
+    err = x86_adapt_device_create(cpu);
+    if (!err)
+        read_defaults_cpu(cpu);
+    return 0;
+}
+
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0) */
+
 
 /* this function is used to generate the path in /dev 
  * for the corresponding /sys/class/x86_adapt entries
@@ -1478,9 +1538,13 @@ static int __init x86_adapt_init(void)
 {
     DEFINE_CHECK_VARIABLES
     int i,err;
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_begin();
 #endif
+#endif
+
     get_online_cpus();
     if ((x86_adapt_class = class_create(THIS_MODULE, "x86_adapt")) == NULL) {
         printk(KERN_ERR "Failed to create sysfs class\n");
@@ -1539,10 +1603,27 @@ static int __init x86_adapt_init(void)
     }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+     /* >= 3.15, < 4.10 */
     __register_hotcpu_notifier(&x86_adapt_cpu_notifier);
-    put_online_cpus();
-    cpu_notifier_register_done();
 #else
+    /* >= 4.10 */
+
+    err = cpuhp_setup_state(CPUHP_AP_ONLINE_DYN, "x86_adapt/online",
+              x86_adapt_cpu_hotplug_online,x86_adapt_cpu_hotplug_offline);
+    if (err < 0)
+        goto fail;
+    cpuhp_x86a_state = err;
+#endif
+    /* >= 3.15 */
+    put_online_cpus();
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+    /* >= 3.15, < 4.10 */
+    cpu_notifier_register_done();
+#endif
+#else
+    /* < 3.15 */
     register_hotcpu_notifier(&x86_adapt_cpu_notifier);
     put_online_cpus();
 #endif
@@ -1599,7 +1680,9 @@ fail:
 
     put_online_cpus();
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_done();
+#endif
 #endif
     return err;
 }
@@ -1608,9 +1691,13 @@ static void __exit x86_adapt_exit(void)
 {
     DEFINE_CHECK_VARIABLES
     int i;
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_begin();
 #endif
+#endif
+
     get_online_cpus();
     UNREGISTER_AND_DELETE(x86_adapt_cpu, DEVICE_DESTROY, cpu);
     UNREGISTER_AND_DELETE(x86_adapt_node, DEVICE_DESTROY, node);
@@ -1657,13 +1744,19 @@ static void __exit x86_adapt_exit(void)
 
     class_destroy(x86_adapt_class);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     __unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
-    put_online_cpus();
-    cpu_notifier_register_done();
 #else
+    cpuhp_remove_state(cpuhp_x86a_state);
+#endif
+    put_online_cpus();
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+    cpu_notifier_register_done();
+#endif/* LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0) */
+#else /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
     unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
     put_online_cpus();
-#endif
+#endif /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
     printk(KERN_INFO "Shutting Down x86 Adapt Processor Feature Device Driver\n");
 }
 
