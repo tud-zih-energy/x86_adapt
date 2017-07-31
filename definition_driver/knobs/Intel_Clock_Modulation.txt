@@ -9,4 +9,6 @@ MSR
 //#reserved_settings
 (0x10)
 //#processor_groups
-sandybridge,ivybridge,haswell,broadwell,skylake,knl
+intel
+//#CPUID
+0x06,(eax&0x20) == 0x20
