@@ -1,5 +1,5 @@
 //#description
-Target performance State Value
+Target performance State Value (resolution of frequency domain depends on processor family)
 //#device
 MSR
 //#register_index
@@ -7,4 +7,4 @@ MSR
 //#bit_mask
 0xFFFF
 //#processor_groups
-nehalem,westmere,sandybridge,ivybridge,haswell,broadwell,skylake
+nehalem,westmere,sandybridge,ivybridge,haswell,broadwell,skylake,knl
