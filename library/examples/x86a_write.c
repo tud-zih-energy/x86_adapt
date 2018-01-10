@@ -106,7 +106,7 @@ int main(int argc, char ** argv)
           {"hex", no_argument, 0, 'H'},
           {"item", required_argument, 0, 'i'},
           {"value", required_argument, 0, 'V'},
-          {"die", no_argument, 0, 'd'},
+          {"node", no_argument, 0, 'n'},
           {"cpu", required_argument, 0, 'c'},
           {"verbose", no_argument, 0, 'v'},
           {0,0,0,0}
