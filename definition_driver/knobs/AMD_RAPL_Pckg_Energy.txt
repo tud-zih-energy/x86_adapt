@@ -1,5 +1,5 @@
 //#name
-AMD_RAPL_Pckg_Energy
+Intel_RAPL_Pckg_Energy
 //#description
 MSR 0xC001029B which contains RAPL energy information for the Package
 //#device
