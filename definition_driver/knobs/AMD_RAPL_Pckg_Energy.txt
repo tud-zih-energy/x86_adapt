@@ -1,0 +1,14 @@
+//#name
+AMD_RAPL_Pckg_Energy
+//#description
+MSR 0xC001029B which contains RAPL energy information for the Package
+//#device
+MSRNODE
+//#register_index
+0xC001029B
+//#bit_mask
+0xFFFFFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+amd_ryzen

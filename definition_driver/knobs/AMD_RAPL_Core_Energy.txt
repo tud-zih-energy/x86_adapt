@@ -1,0 +1,14 @@
+//#name
+Intel_RAPL_Core_Energy
+//#description
+MSR 0xC001029A which contains RAPL energy information for the Package
+//#device
+MSRNODE
+//#register_index
+0xC001029A
+//#bit_mask
+0xFFFFFFFF
+//#restricted_settings
+readonly
+//#processor_groups
+amd_ryzen

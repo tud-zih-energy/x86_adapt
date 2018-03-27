@@ -1,0 +1,14 @@
+//#name
+Intel_RAPL_Power_Unit
+//#description
+MSR 0xC0010299 which contains RAPL Power Unit information
+//#device
+MSRNODE
+//#register_index
+0x606
+//#bit_mask
+0xF0F0F
+//#restricted_settings
+readonly
+//#processor_groups
+amd_ryzen
