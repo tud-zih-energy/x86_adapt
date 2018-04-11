@@ -1469,22 +1469,17 @@ static enum cpuhp_state cpuhp_x86a_state;
 
 static int x86_adapt_cpu_hotplug_offline(unsigned int cpu)
 {
-    get_online_cpus();
     if ( x86_adapt_class == NULL )
     {
-        put_online_cpus();
         return ENXIO;
     }
     device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
                 MINOR(x86_adapt_cpu_device)+cpu));
-    put_online_cpus();
     return 0;
 }
 static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
 {
     int err;
-
-    get_online_cpus();
 
     if ( x86_adapt_class == NULL )
     {
@@ -1502,7 +1497,7 @@ static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
     err = x86_adapt_device_create(cpu);
     if (!err)
         read_defaults_cpu(cpu);
-    put_online_cpus();
+
     return 0;
 }
 
@@ -1551,13 +1546,14 @@ static int __init x86_adapt_init(void)
 {
     int i,err;
 
+    get_online_cpus();
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_begin();
 #endif
 #endif
 
-    get_online_cpus();
     if ((x86_adapt_class = class_create(THIS_MODULE, "x86_adapt")) == NULL) {
         printk(KERN_ERR "Failed to create sysfs class\n");
         err = -1;
@@ -1703,13 +1699,14 @@ static void __exit x86_adapt_exit(void)
 {
     int i;
 
+    get_online_cpus();
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_begin();
 #endif
 #endif
 
-    get_online_cpus();
     UNREGISTER_AND_DELETE(x86_adapt_cpu, DEVICE_DESTROY, cpu);
     UNREGISTER_AND_DELETE(x86_adapt_node, DEVICE_DESTROY, node);
     UNREGISTER_AND_DELETE(x86_adapt_def_cpu, DEF_DESTROY, cpu);
