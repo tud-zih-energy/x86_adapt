@@ -1757,14 +1757,13 @@ static void __exit x86_adapt_exit(void)
 #else
     cpuhp_remove_state(cpuhp_x86a_state);
 #endif
-    put_online_cpus();
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_done();
 #endif/* LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0) */
 #else /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
     unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
-    put_online_cpus();
 #endif /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
+    put_online_cpus();
     printk(KERN_INFO "Shutting Down x86 Adapt Processor Feature Device Driver\n");
 }
 
