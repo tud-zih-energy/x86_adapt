@@ -46,6 +46,17 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
         } \
     } while (0)
 
+
+/* checks if the char device was properly intialized and then it will be unregistered and deleted */
+#define UNREGISTER_AND_DELETE(DEV, FUNC, TYPE) \
+    do { \
+        if (DEV##_cdev_ok) \
+            cdev_del(&(DEV##_cdev.cdev)); \
+        FUNC(DEV, TYPE); \
+        if (DEV##_device_ok) \
+            unregister_chrdev_region(DEV##_device, num_possible_##TYPE##s()+1); \
+    } while (0)
+
 /* allocates memory for a northbridge pci device and adds it */
 #define ALLOC_UNCORE_PCI(NAME, NUM, NUM2) \
     do { \
@@ -95,17 +106,6 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
             nb_f##NUM [i] = NULL; \
     } while (0)
 #endif
-
-
-/* checks if the char device was properly intialized and then it will be unregistered and deleted */
-#define UNREGISTER_AND_DELETE(DEV, FUNC, TYPE) \
-    do { \
-        if (DEV##_cdev_ok) \
-            cdev_del(&(DEV##_cdev.cdev)); \
-        FUNC(DEV, TYPE); \
-        if (DEV##_device_ok) \
-            unregister_chrdev_region(DEV##_device, num_possible_##TYPE##s()+1); \
-    } while (0)
 
 /* frees the allocated space for this pci device */
 #define FREE_PCI(NAME) \
@@ -187,16 +187,14 @@ extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 #define X86_ADAPT_NODE 1
 
 
-/* initialize check variables */
-#define DEFINE_CHECK_VARIABLES \
-int x86_adapt_cpu_device_ok = 0; \
-int x86_adapt_node_device_ok = 0; \
-int x86_adapt_def_cpu_device_ok = 0; \
-int x86_adapt_def_node_device_ok = 0; \
-int x86_adapt_cpu_cdev_ok = 0; \
-int x86_adapt_node_cdev_ok = 0; \
-int x86_adapt_def_cpu_cdev_ok = 0; \
-int x86_adapt_def_node_cdev_ok = 0; \
+static int x86_adapt_cpu_device_ok;
+static int x86_adapt_node_device_ok;
+static int x86_adapt_def_cpu_device_ok;
+static int x86_adapt_def_node_device_ok;
+static int x86_adapt_cpu_cdev_ok;
+static int x86_adapt_node_cdev_ok;
+static int x86_adapt_def_cpu_cdev_ok;
+static int x86_adapt_def_node_cdev_ok;
 
 struct x86_adapt_cdev {
     struct cdev cdev;
@@ -1471,14 +1469,28 @@ static enum cpuhp_state cpuhp_x86a_state;
 
 static int x86_adapt_cpu_hotplug_offline(unsigned int cpu)
 {
+    get_online_cpus();
+    if ( x86_adapt_class == NULL )
+    {
+        put_online_cpus();
+        return ENXIO;
+    }
     device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
                 MINOR(x86_adapt_cpu_device)+cpu));
+    put_online_cpus();
     return 0;
 }
 static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
 {
     int err;
-    
+
+    get_online_cpus();
+
+    if ( x86_adapt_class == NULL )
+    {
+        put_online_cpus();
+        return ENXIO;
+    }
     /* unfortunately devices that are online at init receive the hp online call, even though they've been online before.
     * To avoid creating a device twice (which results in a kernel log entry, including stack trace), the devices are
     * destroyed before they are created. device_destroy should check whether the device exists.
@@ -1490,6 +1502,7 @@ static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
     err = x86_adapt_device_create(cpu);
     if (!err)
         read_defaults_cpu(cpu);
+    put_online_cpus();
     return 0;
 }
 
@@ -1536,7 +1549,6 @@ static char* x86_adapt_devnode(struct device *dev, mode_t *mode)
 
 static int __init x86_adapt_init(void)
 {
-    DEFINE_CHECK_VARIABLES
     int i,err;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
@@ -1689,7 +1701,6 @@ fail:
 
 static void __exit x86_adapt_exit(void)
 {
-    DEFINE_CHECK_VARIABLES
     int i;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
