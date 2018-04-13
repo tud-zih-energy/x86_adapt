@@ -15,6 +15,7 @@ class Knob():
     restricted_settings=[]
     reserved_settings=[]
     processor_groups=[]
+    processor_group_reuse=None
     nda=False
     cpuid=None
     filename=None
@@ -29,6 +30,7 @@ class Knob():
         self.restricted_settings=[]
         self.reserved_settings=[]
         self.processor_groups=[]
+        self.processor_group_reuse=None
         self.readonly=False
         self.nda=False
         self.cpuid=None

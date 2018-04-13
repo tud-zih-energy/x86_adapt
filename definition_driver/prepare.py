@@ -100,7 +100,27 @@ for processor_group in processor_groups:
     if  processor_group.name in single_processor_groups:
         text = text+ "static struct knob_vendor* "+processor_group.name+"_ref []= {&"+processor_group.name+"};\n"
 
-
+# unify processor groups
+unified_groups_knobs=[]
+for knob in knobs:
+    print knob.name,
+    found_entry=None
+    for existing_knob in unified_groups_knobs:
+        if len(existing_knob.processor_groups)==len(knob.processor_groups):
+            nr_matches=0
+            for entry in existing_knob.processor_groups:
+                if entry in knob.processor_groups:
+                    nr_matches=nr_matches+1
+            if len(existing_knob.processor_groups)==nr_matches:
+                found_entry=existing_knob
+                break
+    if found_entry!=None:
+        print knob.processor_groups, "Found in", found_entry.name, found_entry.processor_groups
+        knob.processor_group_reuse=found_entry
+    else:
+        print "added"
+        unified_groups_knobs.append(knob)
+        
 # write the knobs
 
 ## restricted settings per knob
@@ -117,6 +137,8 @@ for knob in knobs:
             text = text +str(resvd_setting)+ ","
         text = text[0:-1]
         text = text + "};\n"
+        
+for knob in unified_groups_knobs:
     if len(knob.processor_groups) > 1:
         text = text + "static struct knob_vendor* processorgroups_"+knob.name+"[]={"
         for processor_group in knob.processor_groups:
@@ -169,7 +191,10 @@ for knob in knobs:
         text = text + "\t.knob.reserved_settings=resvd_setting_"+knob.name+",\n"
     text = text + "\t.av_length="+str(len(knob.processor_groups))+",\n"
     if len(knob.processor_groups) > 1:
-        text = text + "\t.av_vendors=processorgroups_"+knob.name+",\n"
+        if knob.processor_group_reuse == None:
+            text = text + "\t.av_vendors=processorgroups_"+knob.name+",\n"
+        else:
+            text = text + "\t.av_vendors=processorgroups_"+knob.processor_group_reuse.name+",\n"
     else:
         text = text + "\t.av_vendors="+knob.processor_groups[0]+"_ref\n,"
     text = text + "\t.blocked_by_cpuid=0}\n,"
