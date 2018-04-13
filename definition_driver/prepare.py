@@ -3,6 +3,7 @@
 #avoid bytecode files, which are not tracked by dpkg
 #which would cause errors when removing the deb package
 import sys
+from symbol import except_clause
 sys.dont_write_bytecode = True
 
 import cpu,os,re,knob
@@ -39,6 +40,23 @@ processor_groups=[]
 single_processor_groups=set()
 knobs=[]
 
+#filter the knobs
+ro_filter_definitions=[]
+filter_file=None
+try:
+    filter_file=open("readonly.filter")
+except:
+    print("Could not open readonly filter file")
+if filter_file!=None:
+    for line in filter_file:
+        line=line[0:line.find("#")]
+        line=line.strip()
+        if len(line)>0:
+            ro_filter_definitions.append(line)
+            print(line)
+    filter_file.close()
+    
+    
 # get the processor groups
 for filename in os.listdir(processor_group_folder):
     if re.match('.*\.txt$', filename) != None:
@@ -47,7 +65,12 @@ for filename in os.listdir(processor_group_folder):
 # read the knobs
 for filename in os.listdir(knob_folder):
     if re.match('.*\.txt$', filename) != None:
-        knobs.append(knob.Knob(knob_folder+filename))
+        new_knob=knob.Knob(knob_folder+filename)
+        # filter read_only
+        for filter_def in ro_filter_definitions:
+            if re.match(filter_def,new_knob.override_name):
+                new_knob.readonly=True
+        knobs.append(new_knob)
 
 # find processor groups with one element
 for knob in knobs:
@@ -99,6 +122,7 @@ for processor_group in processor_groups:
         text = text+ "};\n"
     if  processor_group.name in single_processor_groups:
         text = text+ "static struct knob_vendor* "+processor_group.name+"_ref []= {&"+processor_group.name+"};\n"
+
 
 
 # write the knobs
