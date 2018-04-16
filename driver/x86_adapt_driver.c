@@ -1428,7 +1428,7 @@ static int x86_adapt_device_create(int cpu)
     struct device *dev;
 
     dev = device_create(x86_adapt_class,NULL,MKDEV(MAJOR(x86_adapt_cpu_device), 
-                MINOR(x86_adapt_cpu_device)+cpu),NULL,"cpu_%d",cpu);
+                cpu),NULL,"cpu_%d",cpu);
 
     return IS_ERR(dev) ? PTR_ERR(dev) : 0;
 }
@@ -1483,15 +1483,8 @@ static int x86_adapt_cpu_hotplug_online(unsigned int cpu)
 
     if ( x86_adapt_class == NULL )
     {
-        put_online_cpus();
         return ENXIO;
     }
-    /* unfortunately devices that are online at init receive the hp online call, even though they've been online before.
-    * To avoid creating a device twice (which results in a kernel log entry, including stack trace), the devices are
-    * destroyed before they are created. device_destroy should check whether the device exists.
-    */
-    device_destroy(x86_adapt_class,MKDEV(MAJOR(x86_adapt_cpu_device),
-                MINOR(x86_adapt_cpu_device)+cpu));
 
     /* create the device that's been switched on */
     err = x86_adapt_device_create(cpu);
@@ -1550,6 +1543,7 @@ static int __init x86_adapt_init(void)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+    put_online_cpus();
     cpu_notifier_register_begin();
 #endif
 #endif
@@ -1609,23 +1603,23 @@ static int __init x86_adapt_init(void)
         printk(KERN_ERR "Failed to read defaults\n");
         goto fail;
     }
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+    
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
      /* >= 3.15, < 4.10 */
     __register_hotcpu_notifier(&x86_adapt_cpu_notifier);
+    put_online_cpus();
 #else
     /* >= 4.10 */
 
-    err = cpuhp_setup_state(CPUHP_AP_ONLINE_DYN, "x86_adapt/online",
+    err = cpuhp_setup_state_nocalls(CPUHP_AP_ONLINE_DYN, "x86_adapt/online",
               x86_adapt_cpu_hotplug_online,x86_adapt_cpu_hotplug_offline);
     if (err < 0)
         goto fail;
     cpuhp_x86a_state = err;
-#endif
-    /* >= 3.15 */
     put_online_cpus();
+#endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     /* >= 3.15, < 4.10 */
     cpu_notifier_register_done();
@@ -1635,6 +1629,8 @@ static int __init x86_adapt_init(void)
     register_hotcpu_notifier(&x86_adapt_cpu_notifier);
     put_online_cpus();
 #endif
+    
+
     printk(KERN_INFO "Succesfully Started x86 Adapt Processor Feature Device Driver\n");
     return 0;
 
@@ -1679,19 +1675,25 @@ fail:
     FREE_PCI(hsw_pmon_r2pcie);
     FREE_PCI(hsw_pmon_r3qpi_l0);
     FREE_PCI(hsw_pmon_r3qpi_l1);
-    free_defaults();
 
+    free_defaults();
+    
     if (x86_adapt_class != NULL)
     {
         class_destroy(x86_adapt_class);
+        x86_adapt_class = NULL;
     }
 
-    put_online_cpus();
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_done();
+#else
+    put_online_cpus();
 #endif
+#else
+    put_online_cpus();
 #endif
+
     return err;
 }
 
@@ -1703,9 +1705,16 @@ static void __exit x86_adapt_exit(void)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
-    cpu_notifier_register_begin();
+ /* 3.15-4.9*/
+    __unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
+#else
+ /* 4.10 ff */
+    cpuhp_remove_state(cpuhp_x86a_state);
 #endif
-#endif
+#else /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
+ /* <= 3.14 */
+    unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
+#endif /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
 
     UNREGISTER_AND_DELETE(x86_adapt_cpu, DEVICE_DESTROY, cpu);
     UNREGISTER_AND_DELETE(x86_adapt_node, DEVICE_DESTROY, node);
@@ -1731,7 +1740,6 @@ static void __exit x86_adapt_exit(void)
     FREE_PCI(hsw_pcu0);
     FREE_PCI(hsw_pcu1);
     FREE_PCI(hsw_pcu2);
-
     FREE_PCI(hsw_pmon_ha0);
     FREE_PCI(hsw_pmon_ha1);
     FREE_PCI(hsw_pmon_mc0_chan0);
@@ -1748,22 +1756,14 @@ static void __exit x86_adapt_exit(void)
     FREE_PCI(hsw_pmon_r2pcie);
     FREE_PCI(hsw_pmon_r3qpi_l0);
     FREE_PCI(hsw_pmon_r3qpi_l1);
+
     free_defaults();
 
     class_destroy(x86_adapt_class);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
-    __unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
-#else
-    cpuhp_remove_state(cpuhp_x86a_state);
-#endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
-    cpu_notifier_register_done();
-#endif/* LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0) */
-#else /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
-    unregister_hotcpu_notifier(&x86_adapt_cpu_notifier);
-#endif /*  LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0) */
+    x86_adapt_class = NULL;
+
     put_online_cpus();
+
     printk(KERN_INFO "Shutting Down x86 Adapt Processor Feature Device Driver\n");
 }
 
