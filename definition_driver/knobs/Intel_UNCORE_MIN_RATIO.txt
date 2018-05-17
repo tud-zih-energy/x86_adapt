@@ -1,0 +1,12 @@
+//#description
+Minimal possible ratio of the LLC/Ring
+//#device
+MSRNODE
+//#register_index
+0x620
+//#bit_mask
+(0x7FULL<<8)
+//#processor_groups
+haswell_ep
+//#NDA
+

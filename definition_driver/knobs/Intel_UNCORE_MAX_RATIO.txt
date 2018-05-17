@@ -1,0 +1,12 @@
+//#description
+Maximal possible rate of the LLC/Ring
+//#device
+MSRNODE
+//#register_index
+0x620
+//#bit_mask
+(0x7FULL)
+//#processor_groups
+haswell_ep
+//#NDA
+
