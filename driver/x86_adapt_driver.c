@@ -18,6 +18,9 @@
 
 #include "../definition_driver/x86_adapt_defs.h"
 
+// TODO use pci_get_domain_bus_and_slot and determine the domain number from the device
+#define pci_get_bus_and_slot(b, d) pci_get_domain_bus_and_slot(0, b, d)
+
 extern u32 x86_adapt_get_all_knobs_length(void);
 extern struct knob_entry_definition * x86_adapt_get_all_knobs(void);
 
