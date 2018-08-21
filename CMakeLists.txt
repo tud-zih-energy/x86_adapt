@@ -80,10 +80,10 @@ target_link_libraries(x86a_write ${PROJECT_NAME}_static)
 
 # use make install to install files under CMAKE_INSTALL_PREFIX
 install(FILES library/include/x86_adapt.h DESTINATION include)
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
-install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION lib)
-install(TARGETS x86a_read DESTINATION bin)
-install(TARGETS x86a_write DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static x86a_read x86a_write
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
 install(DIRECTORY library/doc/man DESTINATION share)
 if(NOT ${NO_KERNEL_DRIVER})
 	install(CODE "execute_process(COMMAND make W=1 -C /lib/modules/${KERNEL_VERSION}/build M=${CMAKE_BINARY_DIR}/kernel_module modules_install)")
