@@ -1,7 +1,9 @@
+//#name
+Intel_PKG_C7_RESIDENCY
 //#description
-Value since last reset that this package is in processor-specific C7 states. Count at the same frequency as the TSC.
+Value since last reset that this package is in processor-specific C7 states. Count at the same frequency as the TSC. (deprecated, please use the node wide counter)
 //#device
-MSRNODE
+MSR
 //#register_index
 0x000003fa
 //#restricted_settings

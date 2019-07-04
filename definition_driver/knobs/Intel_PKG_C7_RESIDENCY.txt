@@ -1,7 +1,7 @@
 //#description
 Value since last reset that this package is in processor-specific C7 states. Count at the same frequency as the TSC.
 //#device
-MSR
+MSRNODE
 //#register_index
 0x000003fa
 //#restricted_settings
