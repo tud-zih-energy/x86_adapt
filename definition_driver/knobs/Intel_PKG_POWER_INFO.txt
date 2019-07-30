@@ -1,7 +1,7 @@
 //#description
 reports the package power range information for RAPL usage. Thermal Spec Power (bits 14:0): The unsigned integer value is the equivalent of thermal specification power of the package domain. The unit of this field is specified by the “Power Units” field of RAPL_POWER_UNIT. • Minimum Power (bits 30:16): The unsigned integer value is the equivalent of minimum power derived from electrical spec of the package domain. The unit of this field is specified by the “Power Units” field of RAPL_POWER_UNIT. • Maximum Power (bits 46:32): The unsigned integer value is the equivalent of maximum power derived from the electrical spec of the package domain. The unit of this field is specified by the “Power Units” field of RAPL_POWER_UNIT.
 //#device
-MSR_NODE
+MSRNODE
 //#register_index
 0x614
 //#bit_mask
