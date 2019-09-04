@@ -1,5 +1,5 @@
 //#description
-MSR 0x610 [31:0] which provides access to RAPL package power limit #1 [23:17] Time Window for Power Limit #1 time window for power limit in 2^[21:17]*(1.0+[23:22]/4.0) unit according to Intel_RAPL_Power_Unit; [16] Package Clamping Limitation #1 Allow to go below OS set P/T-state; [15] enable power limitation #1; [14:0] power Limit #1 in power units according to Intel_RAPL_Power_Unit
+MSR 0x610 [31:0] which provides access to RAPL package power limit #1 \n[23:17] Time Window for Power Limit #1 time window for power limit in 2^\n[21:17]*(1.0+\n[23:22]/4.0) unit according to Intel_RAPL_Power_Unit; \n[16] Package Clamping Limitation #1 Allow to go below OS set P/T-state; \n[15] enable power limitation #1; \n[14:0] power Limit #1 in power units according to Intel_RAPL_Power_Unit
 //#device
 MSRNODE
 //#register_index

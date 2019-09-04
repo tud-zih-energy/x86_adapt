@@ -1,7 +1,7 @@
 //#name
 Intel_PERF_GLOBAL_OVF_CTRL
 //#description
-Global Performance Counter Overflow Control (R/W) [0/1/2/3/4/5/6/7] Set 1 to Clear Ovf_PMC{0/1/2/3/4/5/6/7} bit. [31/32/33] Set 1 to Clear Ovf_FIXED_CTR{0/1/2} bit. [62] Set 1 to Clear OvfBuf bit. [63] Set to 1 to clear CondChgd bit.
+Global Performance Counter Overflow Control (R/W) \n[0/1/2/3/4/5/6/7] Set 1 to Clear Ovf_PMC{0/1/2/3/4/5/6/7} bit. \n[31/32/33] Set 1 to Clear Ovf_FIXED_CTR{0/1/2} bit. \n[62] Set 1 to Clear OvfBuf bit. \n[63] Set to 1 to clear CondChgd bit.
 //#device
 MSR
 //#register_index

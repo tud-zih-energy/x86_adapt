@@ -1,5 +1,5 @@
 //#description
-[0:3] On-Demand Clock Modulation Value at 6.25% granularity (4 bit value), [4]: Enable On-Demand Clock Modulation
+\n[0:3] On-Demand Clock Modulation Value at 6.25% granularity (4 bit value), \n[4]: Enable On-Demand Clock Modulation
 //#device
 MSR
 //#register_index
