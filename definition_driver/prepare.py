@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 #avoid bytecode files, which are not tracked by dpkg
 #which would cause errors when removing the deb package
