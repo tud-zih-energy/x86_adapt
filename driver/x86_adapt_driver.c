@@ -719,7 +719,11 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
             case MSR:
                 if (!cpu_online(dev_nr))
                     return -ENXIO;
+                #if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
                 if ( cpumask_equal(get_cpu_mask(dev_nr),&(current->cpus_allowed))) {
+                #else
+                if ( cpumask_equal(get_cpu_mask(dev_nr),current->cpus_ptr)) {
+                #endif
                     register_reading = native_read_msr(knob.register_index);
                 }
                 else {
@@ -925,7 +929,11 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
         switch (knob.device) {
             /* write to msr */
             case MSR:
-                if (cpumask_equal(get_cpu_mask(dev_nr),&(current->cpus_allowed))) {
+                #if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
+                if ( cpumask_equal(get_cpu_mask(dev_nr),&(current->cpus_allowed))) {
+                #else
+                if ( cpumask_equal(get_cpu_mask(dev_nr),current->cpus_ptr)) {
+                #endif
                     native_write_msr(knob.register_index,l,h);
                 }
                 else {
