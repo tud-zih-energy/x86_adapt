@@ -1,5 +1,5 @@
 //#description
-MSR 0x638 [23:0] which provides access to PPO package power limit [23:17] Time Window for Power Limit time window for power limit in 2^[21:17]*(1.0+[23:22]/10.0) unit according to Intel_RAPL_Power_Unit; [16] Clamping Limitation - Allow to go below OS set P/T-state; [15] enable power limitation; [14:0] power Limit in power units according to Intel_RAPL_Power_Unit
+MSR 0x638 [23:0] which provides access to PPO package power limit \n[23:17] Time Window for Power Limit time window for power limit in 2^\n[21:17]*(1.0+\n[23:22]/10.0) unit according to Intel_RAPL_Power_Unit; \n[16] Clamping Limitation - Allow to go below OS set P/T-state; \n[15] enable power limitation; \n[14:0] power Limit in power units according to Intel_RAPL_Power_Unit
 //#device
 MSRNODE
 //#register_index

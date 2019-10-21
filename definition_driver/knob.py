@@ -43,6 +43,7 @@ class Knob():
                 self.override_name=data[line_nr+1].strip()
             if (data[line_nr].strip()=='//#description'):
                 self.description=data[line_nr+1].strip()
+                self.description=self.description.replace('\\n', '\\n"\n"')
             if (data[line_nr].strip()=='//#device'):
                 self.device=data[line_nr+1].strip()
             if (data[line_nr].strip()=='//#register_index'):

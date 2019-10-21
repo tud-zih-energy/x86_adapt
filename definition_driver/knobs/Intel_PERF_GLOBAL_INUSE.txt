@@ -1,5 +1,5 @@
 //#description
-Indicator of core perfmon interface is in use (RO) [0/1/2/n] IA32_PERFEVTSEL0 in use If CPUID.0AH: EAX[15:8] > n [31:n] Reserved. [32/33/34] IA32_FIXED_CTR{0/1/2} in use [62:35] Reserved or Model specific. [63] PMI in use.
+Indicator of core perfmon interface is in use (RO) \n[0/1/2/n] IA32_PERFEVTSEL0 in use If CPUID.0AH: EAX\n[15:8] > n \n[31:n] Reserved. \n[32/33/34] IA32_FIXED_CTR{0/1/2} in use \n[62:35] Reserved or Model specific. \n[63] PMI in use.
 //#device
 MSR
 //#register_index

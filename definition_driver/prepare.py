@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 #avoid bytecode files, which are not tracked by dpkg
 #which would cause errors when removing the deb package
@@ -103,7 +103,7 @@ for processor_group in processor_groups:
 # unify processor groups
 unified_groups_knobs=[]
 for knob in knobs:
-    print knob.name,
+    print(knob.name , end='')
     found_entry=None
     for existing_knob in unified_groups_knobs:
         if len(existing_knob.processor_groups)==len(knob.processor_groups):
@@ -115,10 +115,10 @@ for knob in knobs:
                 found_entry=existing_knob
                 break
     if found_entry!=None:
-        print knob.processor_groups, "Found in", found_entry.name, found_entry.processor_groups
+        print( knob.processor_groups, "Found in", found_entry.name, found_entry.processor_groups)
         knob.processor_group_reuse=found_entry
     else:
-        print "added"
+        print( "added")
         unified_groups_knobs.append(knob)
         
 # write the knobs

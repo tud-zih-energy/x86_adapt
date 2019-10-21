@@ -1,5 +1,5 @@
 //#description
-Fixed-Function Performance Counter Control (R/W) Counter increments while the results of ANDing respective enable bit in IA32_PERF_GLOBAL_CTRL with the corresponding OS or USR bits in this MSR is true. [0/4/8] EN{0/1/2}_OS: Enable Fixed Counter 0/1/2 to count while CPL = 0. [1/5/9] EN{0/1/2}_Usr: Enable Fixed Counter 0/1/2 to count while CPL > 0. [3/7/11] EN{0/1/2}_PMI: Enable PMI when fixed counter 0/1/2 overflows.
+Fixed-Function Performance Counter Control (R/W) Counter increments while the results of ANDing respective enable bit in IA32_PERF_GLOBAL_CTRL with the corresponding OS or USR bits in this MSR is true. \n[0/4/8] EN{0/1/2}_OS: Enable Fixed Counter 0/1/2 to count while CPL = 0. \n[1/5/9] EN{0/1/2}_Usr: Enable Fixed Counter 0/1/2 to count while CPL > 0. \n[3/7/11] EN{0/1/2}_PMI: Enable PMI when fixed counter 0/1/2 overflows.
 //#device
 MSR
 //#register_index
