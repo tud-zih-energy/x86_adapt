@@ -224,14 +224,14 @@ text = text + "}"
 # and replace "#template_holder" with text
 
 if nda:
-    nda_file=open(target_path+"IMPORTANT_README.txt","w")
+    nda_file=open(target_path+"IMPORTANT_README.txt","w",encoding="utf-8")
     nda_file.write(
 "This kernel module contains NDA information.\n"
 "Do not distribute it, do not copy it, do not make it available to anyone!\n"
 )
     nda_file.close()
-templatefile=open(template)
-targetfile=open(target,"w")
+templatefile=open(template,encoding="utf-8")
+targetfile=open(target,"w",encoding="utf-8")
 if nda:
     targetfile.write(
 "/*****************************************************************************/\n"
