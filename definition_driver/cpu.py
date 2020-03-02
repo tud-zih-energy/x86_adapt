@@ -6,7 +6,7 @@ class ProcessorGroup():
     models=[]
     def __init__(self, inputfilename):
         self.name=inputfilename[inputfilename.rfind('/')+1:inputfilename.rfind('.')]
-        inputfile=open(inputfilename)
+        inputfile=open(inputfilename, encoding='utf-8')
         data = list(inputfile)
         self.models=[]
         self.families=[]
