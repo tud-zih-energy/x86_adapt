@@ -36,7 +36,7 @@ class Knob():
         self.cpuid=None
         self.override_name=self.name
 
-        inputfile=open(inputfilename)
+        inputfile=open(inputfilename, encoding='utf-8')
         data = list(inputfile)
         for line_nr in range(0,len(data)-1):
             if (data[line_nr].strip()=='//#name'):
