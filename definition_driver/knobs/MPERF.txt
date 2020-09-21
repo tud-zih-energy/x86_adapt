@@ -1,9 +1,9 @@
 //#description
-Accumulates core clock counts at the coordinated clock frequency, when the logical processor is in C0.
+TSC Frequency Clock Counter
 //#device
 MSR
 //#register_index
-0x000000e8
+0x000000e7
 //#bit_mask
 0xFFFFFFFFFFFFFFFF
 //#restricted_settings
