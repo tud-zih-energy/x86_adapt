@@ -698,12 +698,13 @@ __always_inline static u64 get_setting_from_register_reading(u64 register_readin
 
 __always_inline static int get_current_task_cpu(void)
 {
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-    return current->cpu;
-#else
+#ifndef CONFIG_THREAD_INFO_IN_TASK
+    #error Kernel must be configured with CONFIG_THREAD_INFO_IN_TASK=y
+#endif
+
+    // note: provided iff CONFIG_THREAD_INFO_IN_TASK=y
     struct thread_info *ti =task_thread_info(current);
     return ti->cpu;
-#endif
 }
 
 /* reads the setting of msr / pci knob */
