@@ -5,6 +5,16 @@ Its usage was initially presented at Ena-HPC 2013:
 
 Integrating performance analysis and energy efficiency optimizations in a unified environment, R Schöne, D Molka - Computer Science-Research and Development, 2014, [DOI:10.1007/s00450-013-0243-7](http://dx.doi.org/10.1007/s00450-013-0243-7)
 
+## About this Fork
+This fork **relicenses the entire code under GPL (v2 only)**.
+
+Background:
+Linux has locked down the abilities of proprietary kernel modules
+(which `x86_adapt` is flagged as to accomodate potential NDAs)
+essentially disabling the functionality of `x86_adapt`.
+
+The changes to the [upstream version](https://github.com/s9105947/x86_adapt) are minimal,
+i.e. all of the original credit is still required.
 
 ## Dependencies
 - python
