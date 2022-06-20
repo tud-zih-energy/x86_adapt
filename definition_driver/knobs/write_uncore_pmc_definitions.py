@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 class HaswellPciBox:
 	prefix=None
@@ -42,7 +42,7 @@ class HaswellPciBox:
 
 	def print_one(self,register,name,descr,bitmask):
 		file_name = "{0}{1}_PMON_{2}.txt".format(self.prefix, self.name, name)
-		print("write file", file_name)
+		print(("write file", file_name))
 		f=open(file_name,"w")
 		text=""
 		text=text+"//#name\n"+self.name+"_PMON_"+name+"\n"
@@ -133,7 +133,7 @@ class Box:
 
 	def print_one(self,register,name,descr,bitmask):
 		file_name = "{0}{1}_PMON_{2}.txt".format(self.prefix, self.name, name)
-		print("write file", file_name)
+		print(("write file", file_name))
 		f=open(file_name,"w")
 		text=""
 		text=text+"//#name\n"+self.name+"_PMON_"+name+"\n"
