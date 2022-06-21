@@ -16,9 +16,10 @@ else
     REVISION=$1
 fi
 echo $REVISION
-sed -i "s/###VERSION###/$REVISION/g" debpack/DEBIAN/*
-sed -i "s/###VERSION###/$REVISION/g" debpack/usr/src/x86_adapt_defs-template/dkms.conf
-sed -i "s/###VERSION###/$REVISION/g" debpack/usr/src/x86_adapt_driver-template/*
+
+find debpack/DEBIAN -type f | xargs sed -i "s/###VERSION###/$REVISION/g"
+find debpack/usr/src/x86_adapt_defs-template -type f | xargs sed -i "s/###VERSION###/$REVISION/g"
+find debpack/usr/src/x86_adapt_driver-template -type f | xargs sed -i "s/###VERSION###/$REVISION/g"
 
 #create uncore knobs
 cd definition_driver/knobs
