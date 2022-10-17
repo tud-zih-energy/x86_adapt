@@ -9,4 +9,4 @@ MSR
 //#bit_mask
 0x1
 //#processor_groups
-nehalem,sandybridge,westmere,ivybridge,haswell,broadwell,skylake
+nehalem,sandybridge,westmere,ivybridge,haswell,broadwell,skylake,alderlake

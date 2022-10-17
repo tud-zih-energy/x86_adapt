@@ -7,4 +7,4 @@ MSR
 //#bit_mask
 0x8000
 //#processor_groups
-sandybridge,ivybridge,haswell,broadwell,skylake
+sandybridge,ivybridge,haswell,broadwell,skylake,alderlake

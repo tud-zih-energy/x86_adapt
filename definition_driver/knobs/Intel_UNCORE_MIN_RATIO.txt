@@ -7,6 +7,6 @@ MSRNODE
 //#bit_mask
 (0x7FULL<<8)
 //#processor_groups
-haswell_ep,broadwell,skylake
+haswell_ep,broadwell,skylake,alderlake
 
 
