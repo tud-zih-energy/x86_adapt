@@ -9,4 +9,4 @@ MSR
 //#reserved_setting:
 6
 //#processor_groups
-sandybridge,ivybridge,haswell,broadwell,skylake
+sandybridge,ivybridge,haswell,broadwell,skylake,alderlake
