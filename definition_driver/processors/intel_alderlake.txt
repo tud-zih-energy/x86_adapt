@@ -1,0 +1,6 @@
+//#vendor
+X86_VENDOR_INTEL
+//#families
+0x06
+//#models
+0x97
