@@ -698,12 +698,8 @@ __always_inline static u64 get_setting_from_register_reading(u64 register_readin
 
 __always_inline static int get_current_task_cpu(void)
 {
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-    return current->cpu;
-#else
     struct thread_info *ti =task_thread_info(current);
     return ti->cpu;
-#endif
 }
 
 /* reads the setting of msr / pci knob */
@@ -719,11 +715,11 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
             case MSR:
                 if (!cpu_online(dev_nr))
                     return -ENXIO;
-                #if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
                 if ( cpumask_equal(get_cpu_mask(dev_nr),&(current->cpus_allowed))) {
-                #else
+#else
                 if ( cpumask_equal(get_cpu_mask(dev_nr),current->cpus_ptr)) {
-                #endif
+#endif
                     register_reading = native_read_msr(knob.register_index);
                 }
                 else {
