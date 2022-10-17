@@ -1550,7 +1550,11 @@ static int __init x86_adapt_init(void)
 {
     int i,err;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     get_online_cpus();
+#else
+    cpus_read_lock();
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
@@ -1629,7 +1633,7 @@ static int __init x86_adapt_init(void)
     if (err < 0)
         goto fail;
     cpuhp_x86a_state = err;
-    put_online_cpus();
+    cpus_read_unlock();
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     /* >= 3.15, < 4.10 */
@@ -1699,7 +1703,7 @@ fail:
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_done();
 #else
-    put_online_cpus();
+    cpus_read_unlock();
 #endif
 #else
     put_online_cpus();
@@ -1712,7 +1716,11 @@ static void __exit x86_adapt_exit(void)
 {
     int i;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     get_online_cpus();
+#else
+    cpus_read_lock();
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
@@ -1773,7 +1781,11 @@ static void __exit x86_adapt_exit(void)
     class_destroy(x86_adapt_class);
     x86_adapt_class = NULL;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     put_online_cpus();
+#else
+    cpus_read_unlock();
+#endif
 
     printk(KERN_INFO "Shutting Down x86 Adapt Processor Feature Device Driver\n");
 }
