@@ -696,12 +696,6 @@ __always_inline static u64 get_setting_from_register_reading(u64 register_readin
     return ret_val;
 }
 
-__always_inline static int get_current_task_cpu(void)
-{
-    struct thread_info *ti =task_thread_info(current);
-    return ti->cpu;
-}
-
 /* reads the setting of msr / pci knob */
 static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading) 
 {
@@ -771,7 +765,7 @@ static int read_setting(int dev_nr, struct knob_entry knob,u64 * reading)
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
                 {
-                    int cpu=get_current_task_cpu();
+                    int cpu = task_cpu(current);
                     /* get the first of the online cpus */
                     /* check whether this tasks cpu is on node */
 
@@ -980,7 +974,7 @@ static int write_setting(int dev_nr, struct knob_entry knob, u64 setting)
                 /* if there is an online cpu from the node */
                 if (cpumask_and(&node_online,mask,online))
                 {
-                    int cpu=get_current_task_cpu();
+                    int cpu = task_cpu(current);
                     /* get the first of the online cpus */
                     /* check whether this tasks cpu is on node */
 
