@@ -698,12 +698,13 @@ __always_inline static u64 get_setting_from_register_reading(u64 register_readin
 
 __always_inline static int get_current_task_cpu(void)
 {
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-    return current->cpu;
-#else
+#ifndef CONFIG_THREAD_INFO_IN_TASK
+    #error Kernel must be configured with CONFIG_THREAD_INFO_IN_TASK=y
+#endif
+
+    // note: provided iff CONFIG_THREAD_INFO_IN_TASK=y
     struct thread_info *ti =task_thread_info(current);
     return ti->cpu;
-#endif
 }
 
 /* reads the setting of msr / pci knob */
@@ -1550,11 +1551,11 @@ static int __init x86_adapt_init(void)
 {
     int i,err;
 
-    get_online_cpus();
+    cpus_read_lock();
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
-    put_online_cpus();
+    cpus_read_unlock();
     cpu_notifier_register_begin();
 #endif
 #endif
@@ -1620,7 +1621,7 @@ static int __init x86_adapt_init(void)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
      /* >= 3.15, < 4.10 */
     __register_hotcpu_notifier(&x86_adapt_cpu_notifier);
-    put_online_cpus();
+    cpus_read_unlock();
 #else
     /* >= 4.10 */
 
@@ -1629,7 +1630,7 @@ static int __init x86_adapt_init(void)
     if (err < 0)
         goto fail;
     cpuhp_x86a_state = err;
-    put_online_cpus();
+    cpus_read_unlock();
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     /* >= 3.15, < 4.10 */
@@ -1638,7 +1639,7 @@ static int __init x86_adapt_init(void)
 #else
     /* < 3.15 */
     register_hotcpu_notifier(&x86_adapt_cpu_notifier);
-    put_online_cpus();
+    cpus_read_unlock();
 #endif
     
 
@@ -1699,10 +1700,10 @@ fail:
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
     cpu_notifier_register_done();
 #else
-    put_online_cpus();
+    cpus_read_unlock();
 #endif
 #else
-    put_online_cpus();
+    cpus_read_unlock();
 #endif
 
     return err;
@@ -1712,7 +1713,8 @@ static void __exit x86_adapt_exit(void)
 {
     int i;
 
-    get_online_cpus();
+    //get_online_cpus();
+    cpus_read_lock();
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
@@ -1773,7 +1775,7 @@ static void __exit x86_adapt_exit(void)
     class_destroy(x86_adapt_class);
     x86_adapt_class = NULL;
 
-    put_online_cpus();
+    cpus_read_unlock();
 
     printk(KERN_INFO "Shutting Down x86 Adapt Processor Feature Device Driver\n");
 }

@@ -2,7 +2,7 @@ package: x86-adapt-driver
 version: ###VERSION###
 section: utils
 priority: extra
-depends: build-essential, dkms, python
+depends: build-essential, dkms, python3
 architecture: amd64
 maintainer: Michael Werner <michael.werner3@tu-dresden.de> 
 homepage: https://github.com/tud-zih-energy/x86_adapt
