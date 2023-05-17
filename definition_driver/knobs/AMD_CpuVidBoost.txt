@@ -1,0 +1,10 @@
+//#description
+The value represents the VID of each core with active core boost frequencies.
+//#device
+MSR
+//#register_index
+0xc0010293
+//#bit_mask
+0x3FC000
+//#processor_groups
+amd_ryzen
